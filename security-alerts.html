@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alerts | CyberGuard</title>
+    <link rel="stylesheet" href="security-alerts.css">
+</head>
+<body>
+
+    <header class="topbar">
+        <h2>🛡 Cyber<span>Guard</span></h2>
+        <a href="dashboard.html">Back to Dashboard</a>
+    </header>
+
+    <main class="container">
+        <div class="page-heading">
+            <h1>Security Alerts</h1>
+            <p>Monitor and manage detected security threats.</p>
+        </div>
+
+        <div class="summary">
+            <div class="summary-card">
+                <h3 id="totalAlerts">0</h3>
+                <p>Total Alerts</p>
+            </div>
+
+            <div class="summary-card">
+                <h3 id="openAlerts">0</h3>
+                <p>Open Alerts</p>
+            </div>
+
+            <div class="summary-card">
+                <h3 id="unreadAlerts">0</h3>
+                <p>Unread Alerts</p>
+            </div>
+        </div>
+
+        <section class="alerts-section">
+            <div class="section-heading">
+                <h2>Alert History</h2>
+                <button onclick="loadAlerts()">Refresh</button>
+            </div>
+
+            <div id="alertsContainer">
+                <p>Loading alerts...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="security-alerts.js"></script>
+</body>
+</html>
