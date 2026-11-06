@@ -190,13 +190,21 @@ header {
     color: #00e5a0;
 }
 
-.status span {
+.status .status-dot {
     display: inline-block;
     width: 8px;
     height: 8px;
     background: #00e5a0;
     border-radius: 50%;
     margin-right: 5px;
+}
+
+.status-error {
+    color: #ff7b82;
+}
+
+.status-error .status-dot {
+    background: #ff5964;
 }
 
 /* Features */
@@ -242,9 +250,30 @@ header {
     transition: 0.3s;
 }
 
-.feature-card:hover {
+.feature-card {
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+}
+
+.feature-card:hover,
+.feature-card:focus-visible {
     transform: translateY(-7px);
     border-color: #00e5a0;
+}
+
+.feature-card:focus-visible {
+    outline: 2px solid #00e5a0;
+    outline-offset: 3px;
+}
+
+.feature-link {
+    margin-top: auto;
+    padding-top: 18px;
+    color: #00e5a0;
+    font-size: 13px;
+    font-weight: bold;
 }
 
 .feature-icon {

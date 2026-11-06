@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrations | Cyber Sentinel</title>
+    <link rel="stylesheet" href="integrations.css">
+</head>
+<body>
+    <header class="topbar">
+        <div><strong>🛡 Cyber<span>Sentinel</span></strong><p>Security event integrations</p></div>
+        <nav><a href="dashboard.html">Dashboard</a><a href="security-alerts.html">Alerts</a></nav>
+    </header>
+    <main class="container">
+        <section class="intro">
+            <p class="eyebrow">COLLECT · NORMALIZE · TRIAGE</p>
+            <h1>Connect an event source</h1>
+            <p>Create a scoped ingestion key for a server, application, or log forwarder. Keys belong to your account and can be revoked at any time.</p>
+        </section>
+        <section class="panel create-panel">
+            <h2>New integration key</h2>
+            <form id="keyForm">
+                <label for="keyName">Integration name</label>
+                <div class="form-row"><input id="keyName" maxlength="80" placeholder="e.g. auth-service-prod" required><button type="submit">Create key</button></div>
+            </form>
+            <div id="newKeyNotice" class="key-notice" hidden>
+                <strong>Copy this key now. It will not be shown again.</strong>
+                <div class="key-row"><code id="newKeyValue"></code><button id="copyKey" type="button">Copy</button></div>
+                <p>Store it in your secrets manager. Do not commit it to source control.</p>
+            </div>
+            <p id="formMessage" role="status"></p>
+        </section>
+        <section class="panel">
+            <div class="section-heading"><div><h2>Your integration keys</h2><p>Only the prefix is retained for display.</p></div><button id="refreshKeys" class="secondary" type="button">Refresh</button></div>
+            <div id="keyList" class="key-list"><p>Loading integration keys…</p></div>
+        </section>
+        <section class="panel guide">
+            <h2>Send a batch of events</h2>
+            <p>Send JSON from your log collector or service. Include a stable <code>external_id</code> to prevent duplicate ingestion on retries.</p>
+            <pre><code>curl -X POST <span id="ingestEndpoint"></span> \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"events":[
+    {"external_id":"evt-12345","event_type":"authentication_failure",
+     "observed_at":"2026-11-06T12:30:00Z",
+     "event_data":"Multiple failed login attempts for account admin"}
+  ]}'</code></pre>
+            <p>Each event is assessed and stored. Matching events also create manageable alerts. This local rule engine is a triage layer; forward production telemetry only after deploying behind HTTPS with a production server.</p>
+        </section>
+    </main>
+    <script src="api.js"></script>
+    <script src="integrations.js"></script>
+</body>
+</html>

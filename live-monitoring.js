@@ -1,304 +1,87 @@
-
-// ======================================
-// CYBERGUARD LIVE MONITORING
-// JavaScript Functionality
-// ======================================
-
-// Monitoring Elements
+// Polls persisted events. No synthetic/demo activity is generated.
+const API_BASE = `${API_ORIGIN}/api`;
+const eventList = document.getElementById("eventList");
 const pauseBtn = document.getElementById("pauseBtn");
 const resumeBtn = document.getElementById("resumeBtn");
 const monitoringMessage = document.getElementById("monitoringMessage");
+let paused = false;
+let trendChart;
+let distributionChart;
 
-const eventList = document.getElementById("eventList");
-
-const totalEventsElement = document.getElementById("totalEvents");
-const totalThreatsElement = document.getElementById("totalThreats");
-const criticalAlertsElement = document.getElementById("criticalAlerts");
-
-
-// Monitoring State
-let isMonitoring = true;
-
-let totalEvents = 1248;
-let totalThreats = 186;
-let criticalAlerts = 23;
-
-
-// Sample Security Events
-const sampleEvents = [
-    {
-        type: "Suspicious Login Attempt",
-        description: "Multiple failed login attempts detected",
-        severity: "critical",
-        ip: "203.0.113.45"
-    },
-    {
-        type: "SQL Injection Pattern",
-        description: "Potential SQL injection pattern detected",
-        severity: "high",
-        ip: "198.51.100.23"
-    },
-    {
-        type: "Port Scanning Activity",
-        description: "Multiple port access attempts detected",
-        severity: "medium",
-        ip: "192.0.2.78"
-    },
-    {
-        type: "Unusual Traffic",
-        description: "Abnormal traffic pattern detected",
-        severity: "low",
-        ip: "203.0.113.67"
-    },
-    {
-        type: "XSS Pattern Detected",
-        description: "Potential cross-site scripting pattern",
-        severity: "high",
-        ip: "198.51.100.56"
+function renderEvents(events) {
+    eventList.replaceChildren();
+    if (!events.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "No events have arrived yet. Create an integration key and send a test event.";
+        eventList.appendChild(empty);
+        return;
     }
-];
-
-
-// Update Statistics
-function updateStatistics() {
-
-    totalEventsElement.textContent = totalEvents;
-    totalThreatsElement.textContent = totalThreats;
-    criticalAlertsElement.textContent = criticalAlerts;
-
+    events.slice(0, 8).forEach(event => {
+        const item = document.createElement("div");
+        item.className = "event-item";
+        const severity = document.createElement("span");
+        severity.className = `severity ${String(event.risk_level).toLowerCase()}`;
+        severity.textContent = `${event.risk_level} · ${event.risk_score}`;
+        const details = document.createElement("div");
+        const title = document.createElement("h4");
+        title.textContent = `${event.source} · ${event.event_type}`;
+        const description = document.createElement("p");
+        description.textContent = event.event_data;
+        details.append(title, description);
+        const time = document.createElement("span");
+        time.className = "event-ip";
+        time.textContent = new Date(event.observed_at).toLocaleString();
+        item.append(severity, details, time);
+        eventList.appendChild(item);
+    });
 }
 
-
-// Add New Event
-function addSecurityEvent() {
-
-    if (!isMonitoring) return;
-
-    const event = sampleEvents[
-        Math.floor(Math.random() * sampleEvents.length)
-    ];
-
-    const eventItem = document.createElement("div");
-
-    eventItem.className = "event-item";
-
-    eventItem.innerHTML = `
-        <span class="severity ${event.severity}">
-            ${event.severity.toUpperCase()}
-        </span>
-
-        <div>
-            <h4>${event.type}</h4>
-            <p>${event.description}</p>
-        </div>
-
-        <span class="event-ip">${event.ip}</span>
-    `;
-
-    eventList.prepend(eventItem);
-
-    // Keep only the latest 8 events
-    while (eventList.children.length > 8) {
-        eventList.removeChild(eventList.lastElementChild);
+async function refreshMonitoring() {
+    if (paused) return;
+    try {
+        const [eventsResponse, statsResponse] = await Promise.all([
+            apiFetch(`${API_BASE}/events?per_page=8`),
+            apiFetch(`${API_BASE}/stats`)
+        ]);
+        if (!eventsResponse.ok || !statsResponse.ok) throw new Error("API request failed");
+        const eventsData = await eventsResponse.json();
+        const statsData = await statsResponse.json();
+        const stats = statsData.stats;
+        renderEvents(eventsData.events || []);
+        document.getElementById("totalEvents").textContent = stats.total_events;
+        document.getElementById("totalThreats").textContent = stats.total;
+        document.getElementById("criticalAlerts").textContent = stats.by_risk_level.CRITICAL || 0;
+        distributionChart.data.datasets[0].data = ["CRITICAL", "HIGH", "MEDIUM", "LOW"].map(level => stats.event_by_risk_level[level] || 0);
+        distributionChart.update();
+        trendChart.data.labels = stats.hourly.map(bucket => bucket.hour.slice(11) + ":00");
+        trendChart.data.datasets[0].data = stats.hourly.map(bucket => bucket.count);
+        trendChart.update();
+        monitoringMessage.textContent = `Connected · ${stats.today_events} events today · refreshed ${new Date().toLocaleTimeString()}`;
+    } catch (_error) {
+        monitoringMessage.textContent = "API unavailable. Start the backend to view ingested events.";
     }
-
-    totalEvents++;
-
-    if (event.severity !== "low") {
-        totalThreats++;
-    }
-
-    if (event.severity === "critical") {
-        criticalAlerts++;
-    }
-
-    updateStatistics();
-
 }
 
-
-// Pause Monitoring
-pauseBtn.addEventListener("click", function () {
-
-    isMonitoring = false;
-
-    monitoringMessage.textContent =
-        "Monitoring paused. No new demo events will be added.";
-
+pauseBtn.addEventListener("click", () => {
+    paused = true;
+    monitoringMessage.textContent = "Refresh paused. Existing event records remain visible.";
+});
+resumeBtn.addEventListener("click", () => {
+    paused = false;
+    refreshMonitoring();
 });
 
-
-// Resume Monitoring
-resumeBtn.addEventListener("click", function () {
-
-    isMonitoring = true;
-
-    monitoringMessage.textContent =
-        "Monitoring resumed. Demo events are being generated.";
-
-});
-
-
-// Automatic Demo Event Generation
-setInterval(function () {
-
-    addSecurityEvent();
-
-}, 5000);
-
-
-// ======================================
-// THREAT TRENDS CHART
-// ======================================
-
-const trendCanvas = document.getElementById("threatTrendChart");
-
-new Chart(trendCanvas, {
-
+trendChart = new Chart(document.getElementById("threatTrendChart"), {
     type: "line",
-
-    data: {
-
-        labels: [
-            "00:00",
-            "04:00",
-            "08:00",
-            "12:00",
-            "16:00",
-            "20:00",
-            "24:00"
-        ],
-
-        datasets: [
-            {
-                label: "Threats Detected",
-
-                data: [12, 19, 10, 25, 18, 32, 22],
-
-                borderColor: "#00d9ff",
-
-                backgroundColor: "rgba(0, 217, 255, 0.12)",
-
-                fill: true,
-
-                tension: 0.4,
-
-                borderWidth: 2
-            }
-        ]
-    },
-
-    options: {
-
-        responsive: true,
-
-        maintainAspectRatio: false,
-
-        plugins: {
-
-            legend: {
-                labels: {
-                    color: "#dceaff"
-                }
-            }
-
-        },
-
-        scales: {
-
-            x: {
-                ticks: {
-                    color: "#8497b5"
-                },
-                grid: {
-                    color: "rgba(255,255,255,0.05)"
-                }
-            },
-
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: "#8497b5"
-                },
-                grid: {
-                    color: "rgba(255,255,255,0.05)"
-                }
-            }
-
-        }
-
-    }
-
+    data: { labels: [], datasets: [{ label: "Events with threat indicators", data: [], borderColor: "#00d9ff", backgroundColor: "rgba(0,217,255,.12)", fill: true, tension: .4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#dceaff" } } }, scales: { x: { ticks: { color: "#8497b5" } }, y: { beginAtZero: true, ticks: { color: "#8497b5", precision: 0 } } } }
 });
 
-
-// ======================================
-// THREAT DISTRIBUTION CHART
-// ======================================
-
-const distributionCanvas =
-    document.getElementById("threatDistributionChart");
-
-new Chart(distributionCanvas, {
-
+distributionChart = new Chart(document.getElementById("threatDistributionChart"), {
     type: "doughnut",
-
-    data: {
-
-        labels: [
-            "Critical",
-            "High",
-            "Medium",
-            "Low"
-        ],
-
-        datasets: [{
-
-            data: [23, 45, 58, 60],
-
-            backgroundColor: [
-                "#ff5252",
-                "#ffad42",
-                "#ffe16b",
-                "#42f5a7"
-            ],
-
-            borderWidth: 0
-
-        }]
-
-    },
-
-    options: {
-
-        responsive: true,
-
-        maintainAspectRatio: false,
-
-        plugins: {
-
-            legend: {
-
-                position: "bottom",
-
-                labels: {
-                    color: "#dceaff",
-                    padding: 15
-                }
-
-            }
-
-        }
-
-    }
-
+    data: { labels: ["Critical", "High", "Medium", "Low"], datasets: [{ data: [0, 0, 0, 0], backgroundColor: ["#ff5252", "#ffad42", "#ffe16b", "#42f5a7"], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#dceaff", padding: 15 } } } }
 });
 
-
-// Initial Statistics
-updateStatistics();
-
-
-// Initial Message
-monitoringMessage.textContent =
-    "Monitoring interface active. Sample events are running.";
+refreshMonitoring();
+setInterval(refreshMonitoring, 10000);

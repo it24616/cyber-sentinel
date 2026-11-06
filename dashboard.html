@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Admin Dashboard | CyberGuard</title>
+    <title>Security Dashboard | Cyber Sentinel</title>
 
     <link rel="stylesheet" href="dashboard.css">
 
@@ -22,7 +22,7 @@
         <aside class="sidebar">
 
             <div class="logo">
-                🛡 Cyber<span>Guard</span>
+                🛡 Cyber <span>Sentinel</span>
             </div>
 
             <p class="menu-title">MAIN MENU</p>
@@ -47,6 +47,10 @@
 
                 <a href="security-alerts.html">
                     <span>♧</span> Security Alerts
+                </a>
+
+                <a href="integrations.html">
+                    <span>⇄</span> Integrations
                 </a>
 
                 <a href="#activities">
@@ -78,8 +82,8 @@
             <header class="topbar">
 
                 <div>
-                    <h2>Admin Dashboard</h2>
-                    <p>Welcome to CyberGuard Security Center</p>
+                    <h2>Security Dashboard</h2>
+                    <p>Account-scoped event monitoring and alert response.</p>
                 </div>
 
                 <div class="admin-profile">
@@ -88,13 +92,13 @@
                         🔔
                     </div>
 
-                    <div class="admin-avatar">
+                    <div class="admin-avatar" id="profileAvatar">
                         A
                     </div>
 
                     <div>
-                        <h4>Administrator</h4>
-                        <p>System Admin</p>
+                        <h4 id="profileName">Signed-in user</h4>
+                        <p id="profileRole">Analyst</p>
                     </div>
 
                 </div>
@@ -125,8 +129,8 @@
                     <div class="stat-card">
                         <div class="stat-icon">⚠️</div>
                         <p>Total Threats Detected</p>
-                        <h2 id="totalThreats">128</h2>
-                        <span class="danger">Demo statistics</span>
+                        <h2 id="totalThreats">—</h2>
+                        <span class="danger">Recorded alerts</span>
                     </div>
 
                     <div class="stat-card">
@@ -139,8 +143,8 @@
                     <div class="stat-card">
                         <div class="stat-icon">🚨</div>
                         <p>Critical Alerts</p>
-                        <h2>08</h2>
-                        <span class="danger">Demo statistics</span>
+                        <h2 id="criticalAlerts">—</h2>
+                        <span class="danger">Recorded critical alerts</span>
                     </div>
 
                     <div class="stat-card">
@@ -162,7 +166,7 @@
                 <div class="section-title">
                     <h2>System Monitoring</h2>
                     <span class="online-status">
-                        <span></span> UI Demo
+                        <span></span> Local API
                     </span>
                 </div>
 
@@ -170,7 +174,7 @@
 
                     <div>
                         <h3>Security Monitoring Status</h3>
-                        <p>Backend monitoring is not connected yet.</p>
+                        <p>Alert counts and recent assessments are loaded from the local API.</p>
                     </div>
 
                     <div class="monitoring-status">
@@ -190,7 +194,7 @@
 
                     <div class="section-title">
                         <h3>Threat Detection Analytics</h3>
-                        <span>Sample Data</span>
+                        <span>Illustrative weekly sample</span>
                     </div>
 
                     <canvas id="threatChart"></canvas>
@@ -202,7 +206,7 @@
 
                     <div class="section-title">
                         <h3>Threat Distribution</h3>
-                        <span>Sample Data</span>
+                        <span>Updated from alert history</span>
                     </div>
 
                     <canvas id="distributionChart"></canvas>
@@ -226,28 +230,28 @@
                         <span class="risk-dot critical"></span>
                         <h3>Critical Risk</h3>
                         <p>High priority threats</p>
-                        <h2>08</h2>
+                        <h2 id="criticalRiskCount">—</h2>
                     </div>
 
                     <div class="risk-card">
                         <span class="risk-dot high"></span>
                         <h3>High Risk</h3>
                         <p>Potential security issues</p>
-                        <h2>24</h2>
+                        <h2 id="highRiskCount">—</h2>
                     </div>
 
                     <div class="risk-card">
                         <span class="risk-dot medium"></span>
                         <h3>Medium Risk</h3>
                         <p>Moderate risk activities</p>
-                        <h2>46</h2>
+                        <h2 id="mediumRiskCount">—</h2>
                     </div>
 
                     <div class="risk-card">
                         <span class="risk-dot low"></span>
                         <h3>Low Risk</h3>
                         <p>Low priority activities</p>
-                        <h2>50</h2>
+                        <h2 id="lowRiskCount">—</h2>
                     </div>
 
                 </div>
@@ -261,7 +265,7 @@
 
                 <div class="section-title">
                     <h2>Recent Security Alerts</h2>
-                    <span class="view-all">Demo Records</span>
+                    <span class="view-all">Latest recorded alerts</span>
                 </div>
 
                 <div class="table-container">
@@ -278,7 +282,7 @@
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody id="recentAlertsBody">
 
                             <tr>
                                 <td>#CG001</td>
@@ -366,13 +370,14 @@
             <!-- Footer -->
 
             <footer>
-                © 2026 CyberGuard | Intelligent Cybersecurity Monitoring System
+                © 2026 Cyber Sentinel | Security Event Monitoring & Triage
             </footer>
 
         </main>
 
     </div>
 
+    <script src="api.js"></script>
     <script src="dashboard.js"></script>
 
 </body>
