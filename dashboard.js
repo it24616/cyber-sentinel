@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const distributionCanvas =
         document.getElementById("distributionChart");
 
-    new Chart(distributionCanvas, {
+    const distributionChart = new Chart(distributionCanvas, {
 
         type: "doughnut",
 
@@ -129,17 +129,57 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const refreshBtn = document.getElementById("refreshBtn");
 
-    refreshBtn.addEventListener("click", function () {
+    async function loadDashboardData() {
+        try {
+            const [statsResponse, alertsResponse, userResponse] = await Promise.all([
+                apiFetch("/api/stats"),
+                apiFetch("/api/alerts?per_page=4"),
+                apiFetch("/api/auth/me")
+            ]);
+            if (!statsResponse.ok || !alertsResponse.ok || !userResponse.ok) throw new Error("API unavailable");
+            const stats = (await statsResponse.json()).stats;
+            const alerts = (await alertsResponse.json()).alerts;
+            const userData = await userResponse.json();
+            const currentUser = userData.user;
+            document.getElementById("profileName").textContent = currentUser.full_name;
+            document.getElementById("profileRole").textContent = currentUser.role;
+            document.getElementById("profileAvatar").textContent = currentUser.full_name.slice(0, 1).toUpperCase();
+            document.getElementById("totalThreats").textContent = stats.total;
+            document.getElementById("criticalAlerts").textContent = stats.by_risk_level.CRITICAL;
+            document.getElementById("criticalRiskCount").textContent = stats.by_risk_level.CRITICAL;
+            document.getElementById("highRiskCount").textContent = stats.by_risk_level.HIGH;
+            document.getElementById("mediumRiskCount").textContent = stats.by_risk_level.MEDIUM;
+            document.getElementById("lowRiskCount").textContent = stats.by_risk_level.LOW;
+            distributionChart.data.datasets[0].data = ["CRITICAL", "HIGH", "MEDIUM", "LOW"].map(level => stats.by_risk_level[level]);
+            distributionChart.update();
+            const body = document.getElementById("recentAlertsBody");
+            body.replaceChildren();
+            alerts.forEach(alert => {
+                const row = document.createElement("tr");
+                ["#" + alert.id, (alert.detected_threats || []).join(", "), alert.risk_level,
+                    new Date(alert.created_at).toLocaleString(), alert.status].forEach(value => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+                body.appendChild(row);
+            });
+            if (!alerts.length) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 5;
+                cell.textContent = "No alerts recorded yet.";
+                row.appendChild(cell);
+                body.appendChild(row);
+            }
+            document.getElementById("apiStatus").lastChild.textContent = " API Connected";
+        } catch (_error) {
+            document.getElementById("apiStatus").lastChild.textContent = " API Unavailable";
+        }
+    }
 
-        refreshBtn.textContent = "↻ Demo Refreshed";
-
-        setTimeout(function () {
-
-            refreshBtn.textContent = "↻ Refresh";
-
-        }, 1500);
-
-    });
+    refreshBtn.addEventListener("click", loadDashboardData);
+    loadDashboardData();
 
 
     // Sidebar Active Menu
@@ -168,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const logoutBtn = document.getElementById("logoutBtn");
 
-    logoutBtn.addEventListener("click", function (event) {
+    logoutBtn.addEventListener("click", async function (event) {
 
         event.preventDefault();
 
@@ -176,7 +216,12 @@ document.addEventListener("DOMContentLoaded", function () {
             confirm("Are you sure you want to logout?");
 
         if (confirmLogout) {
-
+            try {
+                await apiFetch("/api/auth/logout", { method: "POST" });
+            } catch (_error) {
+                // The local session cookie expires with the browser if the API is unavailable.
+            }
+            sessionStorage.removeItem("cyberSentinelCsrf");
             window.location.href = "login.html";
 
         }

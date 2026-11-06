@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risk Assessment | CyberGuard</title>
+    <title>Risk Assessment | Cyber Sentinel</title>
     <link rel="stylesheet" href="risk-assessment.css">
 </head>
 
@@ -15,16 +15,16 @@
     <!-- Sidebar -->
     <aside class="sidebar">
 
-        <div class="logo">🛡 Cyber<span>Guard</span></div>
+        <div class="logo">🛡 Cyber <span>Sentinel</span></div>
 
         <p class="menu-title">MAIN MENU</p>
 
         <ul>
             <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="threat-detection.html">Threat Detection</a></li>
-            <li><a href="dashboard.html">Live Monitoring</a></li>
+            <li><a href="live-monitoring.html">Live Monitoring</a></li>
             <li><a href="risk-assessment.html" class="active">Risk Assessment</a></li>
-            <li><a href="dashboard.html">Security Alerts</a></li>
+            <li><a href="security-alerts.html">Security Alerts</a></li>
             <li><a href="index.html">Back to Website</a></li>
         </ul>
 
@@ -40,104 +40,148 @@
         <header class="topbar">
             <div>
                 <h2>Risk Assessment</h2>
-                <p>Analyze cybersecurity risks using Python Backend.</p>
+                <p>Assess submitted event text with explainable detection rules.</p>
             </div>
 
-            <span class="admin">Administrator</span>
+            <span class="admin">Signed-in account</span>
         </header>
 
         <section class="heading">
+            <p class="eyebrow">SECURITY OPERATIONS / ANALYSIS</p>
             <h1>Cyber Risk Analysis</h1>
-            <p>Evaluate security events and identify potential risks.</p>
+            <p>Turn suspicious activity into clear, actionable findings.</p>
         </section>
 
         <!-- Summary Cards -->
         <section class="cards">
 
             <div class="card">
-                <p>Assessment Engine</p>
-                <h2>Python Flask</h2>
-                <span>Backend Analysis</span>
+                <p>Analysis engine</p>
+                <h2>Explainable rules</h2>
+                <span>Transparent, server-side detection</span>
             </div>
 
             <div class="card">
-                <p>Risk Score Range</p>
+                <p>Risk score</p>
                 <h2>0 - 100</h2>
-                <span>Risk Measurement</span>
+                <span>Higher scores need closer review</span>
             </div>
 
             <div class="card">
-                <p>Risk Categories</p>
-                <h2>04</h2>
-                <span>Critical, High, Medium, Low</span>
+                <p>Assessment levels</p>
+                <h2>4 levels</h2>
+                <span>Critical, high, medium and low</span>
             </div>
 
         </section>
 
         <!-- Assessment Form -->
-        <section class="panel">
+        <section class="panel assessment-panel" aria-labelledby="assessmentTitle">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">NEW ASSESSMENT</p>
+                    <h2 id="assessmentTitle">Analyze a security event</h2>
+                </div>
+                <span class="secure-label">Private to your account</span>
+            </div>
+            <p class="subtext">Submit an event, request, URL or log excerpt. Your assessment is analyzed and saved to your account.</p>
 
-            <h2>Assess Security Risk</h2>
+            <form id="assessmentForm">
+                <div class="form-row">
+                    <div class="field-group">
+                        <label for="eventType">Input type</label>
+                        <select id="eventType" name="event_type">
+                            <option value="general">General event</option>
+                            <option value="log">Log entry</option>
+                            <option value="request">HTTP request</option>
+                            <option value="url">URL</option>
+                        </select>
+                    </div>
+                    <div class="field-hint">Choose the format that best describes your input.</div>
+                </div>
 
-            <p class="subtext">
-                Enter a security event to calculate its risk score.
-            </p>
+                <div class="field-group">
+                    <label for="eventData">Security event data <span class="required-mark">Required</span></label>
+                    <textarea
+                        id="eventData"
+                        name="event_data"
+                        maxlength="10000"
+                        placeholder="Paste an event or log excerpt, for example: Multiple failed login attempts detected for an administrator account."
+                        aria-describedby="inputHelp characterCount"
+                        required
+                    ></textarea>
+                    <div class="input-meta">
+                        <span id="inputHelp">Do not include passwords, API keys, or other secrets.</span>
+                        <span id="characterCount" aria-live="polite">0 / 10,000</span>
+                    </div>
+                </div>
 
-            <label for="eventData">Security Event Data</label>
+                <div class="examples" aria-label="Example events">
+                    <span>Try an example:</span>
+                    <button class="example-button" type="button" data-example="log">Failed logins</button>
+                    <button class="example-button" type="button" data-example="request">Suspicious request</button>
+                    <button class="example-button" type="button" data-example="clean">Routine event</button>
+                </div>
 
-            <textarea
-                id="eventData"
-                placeholder="Example: Multiple failed login attempts detected."
-            ></textarea>
-
-            <button id="analyzeBtn">
-                Analyze Risk
-            </button>
-
-            <p id="statusMessage"></p>
-
+                <div class="form-actions">
+                    <button id="analyzeBtn" type="submit">
+                        <span class="button-label">Analyze event</span>
+                        <span class="button-arrow" aria-hidden="true">→</span>
+                    </button>
+                    <p id="statusMessage" role="status" aria-live="polite"></p>
+                </div>
+            </form>
         </section>
 
         <!-- Result -->
-        <section class="result-panel" id="resultPanel" hidden>
-
-            <h2>Risk Assessment Result</h2>
-
+        <section class="result-panel" id="resultPanel" aria-labelledby="resultTitle" hidden>
+            <div class="result-heading">
+                <div>
+                    <p class="eyebrow">ASSESSMENT COMPLETE</p>
+                    <h2 id="resultTitle">Assessment result</h2>
+                </div>
+                <span id="resultRecord" class="record-label"></span>
+            </div>
             <div class="result-grid">
-
-                <div class="result-card">
-                    <p>Risk Score</p>
-                    <h1 id="riskScore">0</h1>
-                    <span>Out of 100</span>
+                <div class="result-card score-card">
+                    <div class="score-header">
+                        <p>Risk score</p>
+                        <span id="riskLevel" class="risk-badge">—</span>
+                    </div>
+                    <div class="score-value"><strong id="riskScore">0</strong><span>/ 100</span></div>
+                    <div class="score-track" id="scoreTrack" role="progressbar" aria-label="Risk score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <span id="scoreBar"></span>
+                    </div>
+                    <p id="scoreCaption" class="score-caption"></p>
                 </div>
-
-                <div class="result-card">
-                    <p>Risk Level</p>
-                    <h2 id="riskLevel">-</h2>
+                <div class="result-card recommendation-card">
+                    <p class="detail-label">Recommended next step</p>
+                    <p id="recommendation"></p>
+                    <p class="disclaimer">Rule matches are indicators for investigation, not proof of an attack.</p>
                 </div>
-
             </div>
-
-            <div class="details">
-
-                <h3>Detected Threats</h3>
-                <ul id="threatList"></ul>
-
-                <h3>Security Recommendation</h3>
-                <p id="recommendation"></p>
-
+            <div class="findings-section">
+                <div class="findings-heading">
+                    <div>
+                        <h3>Detection findings</h3>
+                        <p>Signals matched by the assessment engine</p>
+                    </div>
+                    <span id="findingCount" class="finding-count"></span>
+                </div>
+                <div id="findingsList" class="findings-list"></div>
+                <p id="noFindings" class="no-findings" hidden>No configured indicators matched this event. Continue routine monitoring.</p>
             </div>
-
         </section>
 
         <footer>
-            CyberGuard © 2026 | Intelligent Cybersecurity Monitoring System
+            Cyber Sentinel © 2026 <span>·</span> Security event triage
         </footer>
 
     </main>
 
 </div>
 
+<script src="api.js"></script>
 <script src="risk-assessment.js"></script>
 
 </body>

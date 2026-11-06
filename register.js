@@ -1,63 +1,46 @@
-
 const registerForm = document.getElementById("registerForm");
-
-registerForm.addEventListener("submit", function(event) {
-
+registerForm.addEventListener("submit", async event => {
     event.preventDefault();
-
-    // Get form values
-
-    const fullname = document.getElementById("fullname").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-    const terms = document.getElementById("terms").checked;
-
     const message = document.getElementById("message");
-
-    // Password length validation
-
-    if (password.length < 8) {
-
+    const password = document.getElementById("password").value;
+    if (password.length < 12) {
         message.style.color = "#ff5c5c";
-        message.textContent =
-            "Password must contain at least 8 characters.";
-
+        message.textContent = "Use a password with at least 12 characters.";
         return;
     }
-
-    // Password matching validation
-
-    if (password !== confirmPassword) {
-
+    if (password !== document.getElementById("confirmPassword").value) {
         message.style.color = "#ff5c5c";
-        message.textContent =
-            "Password and Confirm Password do not match!";
-
+        message.textContent = "Passwords do not match.";
         return;
     }
-
-    // Terms validation
-
-    if (!terms) {
-
+    if (!document.getElementById("terms").checked) {
         message.style.color = "#ff5c5c";
-        message.textContent =
-            "Please accept the Terms & Conditions.";
-
+        message.textContent = "Please accept the Terms & Conditions.";
         return;
     }
-
-    // Registration demo message
-
-    message.style.color = "#00e5a0";
-
-    message.textContent =
-        "Form validation successful! Backend registration is not connected yet.";
-
-    console.log("Name:", fullname);
-    console.log("Email:", email);
-    console.log("Phone:", phone);
-
+    const submit = registerForm.querySelector('[type="submit"]');
+    submit.disabled = true;
+    message.textContent = "Creating your account…";
+    try {
+        const response = await apiFetch(`${API_ORIGIN}/api/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                full_name: document.getElementById("fullname").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                password
+            })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Account creation failed.");
+        message.style.color = "#00e5a0";
+        message.textContent = "Account created. Redirecting to sign in…";
+        setTimeout(() => window.location.assign("login.html"), 900);
+    } catch (error) {
+        message.style.color = "#ff5c5c";
+        message.textContent = error.message || "Could not reach the security service.";
+    } finally {
+        submit.disabled = false;
+    }
 });
