@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../assets/js/core/frame.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Event | Cyber Sentinel</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/pages/analyze.css">
+</head>
+<body>
+<main class="page analyze-page">
+
+    <header class="page-header">
+        <div>
+            <h1>Analyze a security event</h1>
+            <p>Paste a URL, HTTP request or log line. The rule engine explains what it found, how serious it is and what to do next.</p>
+        </div>
+    </header>
+
+    <section class="card" aria-labelledby="formTitle">
+        <h2 id="formTitle" class="sr-only">Event input</h2>
+        <form id="analyzeForm" novalidate>
+            <div class="form-top">
+                <div class="field type-field">
+                    <label for="eventType">Event type</label>
+                    <select id="eventType" class="select">
+                        <option value="general">General security event</option>
+                        <option value="url">Website URL</option>
+                        <option value="request">HTTP request</option>
+                        <option value="log">Log entry</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <span class="label" id="samplesLabel">Try a sample</span>
+                    <div class="chip-group" id="samples" role="group" aria-labelledby="samplesLabel">
+                        <button type="button" class="chip" data-sample="sqli">SQL injection</button>
+                        <button type="button" class="chip" data-sample="xss">XSS</button>
+                        <button type="button" class="chip" data-sample="jndi">Log4Shell</button>
+                        <button type="button" class="chip" data-sample="traversal">Path traversal</button>
+                        <button type="button" class="chip" data-sample="brute">Brute force</button>
+                        <button type="button" class="chip" data-sample="benign">Normal traffic</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field event-field">
+                <label for="eventInput" id="eventInputLabel">Event data</label>
+                <textarea id="eventInput" class="textarea" rows="8" maxlength="10000" spellcheck="false"
+                    aria-describedby="inputHelp charCount formError"
+                    placeholder="GET /search?q=%27%20OR%201%3D1-- HTTP/1.1"></textarea>
+                <div class="input-meta">
+                    <span id="inputHelp">Don't paste passwords, API keys or other secrets. <span id="inputWarning" class="text-medium" hidden></span></span>
+                    <span id="charCount">0 / 10,000</span>
+                </div>
+            </div>
+
+            <p id="formError" class="field-error" role="alert" hidden></p>
+
+            <div class="form-actions">
+                <button type="submit" id="analyzeBtn" class="btn btn-primary">Analyze event</button>
+                <button type="button" id="clearBtn" class="btn btn-ghost">Clear</button>
+                <span class="subtle shortcut"><kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>Enter</kbd></span>
+            </div>
+        </form>
+    </section>
+
+    <section class="card section result" id="resultPanel" hidden aria-live="polite" aria-labelledby="verdictTitle">
+        <div class="verdict">
+            <div class="score-ring" id="scoreRing" style="--score: 0">
+                <strong id="scoreValue">0</strong>
+                <small>/ 100</small>
+            </div>
+            <div class="verdict-body">
+                <div class="row">
+                    <span class="badge" id="riskBadge">LOW</span>
+                    <span class="subtle" id="resultMeta"></span>
+                </div>
+                <h2 id="verdictTitle">No indicators matched</h2>
+                <p id="recommendation" class="muted"></p>
+                <p id="alertLink" class="alert-link"></p>
+            </div>
+        </div>
+
+        <h3 class="findings-title">Findings</h3>
+        <div id="findings" class="findings"></div>
+        <div class="report-actions" id="reportActions" hidden>
+            <button type="button" class="btn btn-primary" id="downloadReportBtn">Download PDF report</button>
+        </div>
+        <p class="subtle disclaimer">A rule match is an indicator for investigation, not proof of an attack.</p>
+    </section>
+
+    <section class="card section" id="rules">
+        <details class="disclosure" id="ruleCatalog">
+            <summary>
+                <span><strong>Detection rule catalog</strong> <span class="subtle" id="catalogCount"></span></span>
+            </summary>
+            <div class="table-wrap catalog-table">
+                <table class="table">
+                    <thead>
+                        <tr><th>Rule</th><th>Category</th><th class="num">Weight</th><th>MITRE ATT&amp;CK</th><th>CWE</th></tr>
+                    </thead>
+                    <tbody id="catalogBody">
+                        <tr><td colspan="5" class="muted">Loading rules…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </section>
+
+</main>
+
+<script src="../assets/js/core/api.js"></script>
+<script src="../assets/js/core/ui.js"></script>
+<script src="../assets/js/pages/analyze.js"></script>
+</body>
+</html>

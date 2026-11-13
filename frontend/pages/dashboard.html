@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../assets/js/core/frame.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Cyber Sentinel</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/pages/dashboard.css">
+</head>
+<body>
+<main class="page">
+
+    <header class="page-header">
+        <div>
+            <h1>Security overview</h1>
+            <p>Alerts, detections and response activity for your account.</p>
+        </div>
+        <div class="page-actions">
+            <span class="live-status" id="apiStatus" data-state="connecting">Connecting…</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="refreshBtn">↻ Refresh</button>
+            <a class="btn btn-primary btn-sm" href="../app.html#/analyze">Analyze an event</a>
+        </div>
+    </header>
+
+    <!-- Shown until the account has its first event. -->
+    <section class="card onboarding" id="onboarding" hidden aria-labelledby="onboardingTitle">
+        <div>
+            <p class="eyebrow">Get started</p>
+            <h2 id="onboardingTitle">Welcome to Cyber Sentinel 👋</h2>
+            <p class="muted">No events yet. Three steps to see your first alert:</p>
+        </div>
+        <ol class="steps">
+            <li>
+                <span class="step-number">1</span>
+                <div>
+                    <h3>Try a sample attack</h3>
+                    <p>Run a SQL injection sample through the detection engine.</p>
+                    <a class="btn btn-primary btn-sm" href="../app.html#/analyze?sample=sqli">Analyze a sample</a>
+                </div>
+            </li>
+            <li>
+                <span class="step-number">2</span>
+                <div>
+                    <h3>Connect a source</h3>
+                    <p>Create an API key and send events from your server or app.</p>
+                    <a class="btn btn-secondary btn-sm" href="../app.html#/integrations">Create a key</a>
+                </div>
+            </li>
+            <li>
+                <span class="step-number">3</span>
+                <div>
+                    <h3>Triage alerts</h3>
+                    <p>Acknowledge, investigate and resolve what the rules find.</p>
+                    <a class="btn btn-secondary btn-sm" href="../app.html#/alerts">Open alerts</a>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <section class="grid grid-4" aria-label="Key figures">
+        <div class="card stat">
+            <span class="stat-label">Total alerts</span>
+            <span class="stat-value" id="totalAlerts">—</span>
+            <span class="stat-meta" id="totalAlertsMeta">All recorded alerts</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">Open alerts</span>
+            <span class="stat-value" id="openAlerts">—</span>
+            <span class="stat-meta" id="openAlertsMeta">Need attention</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">System risk level</span>
+            <span class="stat-value" id="systemRiskLevel">—</span>
+            <span class="stat-meta" id="systemRiskDetail">Highest severity among open alerts</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">Monitoring</span>
+            <span class="stat-value" id="monitoringState">—</span>
+            <span class="stat-meta" id="monitoringDetail">Checking API…</span>
+        </div>
+    </section>
+
+    <section class="grid dashboard-charts section">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Detections <small>last 7 days (UTC)</small></h2>
+                    <p>Events that matched at least one rule</p>
+                </div>
+            </div>
+            <div class="chart-box"><canvas id="threatChart" aria-label="Detections per day, last 7 days" role="img"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Alerts by severity</h2>
+                    <p>All active alerts</p>
+                </div>
+            </div>
+            <div class="distribution">
+                <div class="chart-box chart-box-sm"><canvas id="distributionChart" aria-label="Alerts by severity" role="img"></canvas></div>
+                <ul class="severity-legend" id="severityLegend"></ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid dashboard-lists section">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Recent alerts</h2>
+                    <p>Newest alerts in your queue</p>
+                </div>
+                <a class="link-btn" href="../app.html#/alerts">View all →</a>
+            </div>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr><th>ID</th><th>Threat</th><th>Severity</th><th>Status</th><th>When</th></tr>
+                    </thead>
+                    <tbody id="recentAlertsBody">
+                        <tr><td colspan="5" class="muted">Loading alerts…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" id="activities">
+            <div class="card-header">
+                <div>
+                    <h2>Recent activity</h2>
+                    <p>Alert changes across your account</p>
+                </div>
+            </div>
+            <ul class="activity-list" id="activityList">
+                <li class="empty-inline">Loading activity…</li>
+            </ul>
+        </div>
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="../assets/js/core/api.js"></script>
+<script src="../assets/js/core/ui.js"></script>
+<script src="../assets/js/core/charts.js"></script>
+<script src="../assets/js/pages/dashboard.js"></script>
+</body>
+</html>

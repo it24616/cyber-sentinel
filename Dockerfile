@@ -14,7 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && mkdir -p /data \
     && chown cyber:cyber /data
 
-COPY backend/*.py /app/backend/
+# Whole package (routes/ included); tests and local databases are excluded by .dockerignore.
+COPY backend /app/backend
 USER cyber
 EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

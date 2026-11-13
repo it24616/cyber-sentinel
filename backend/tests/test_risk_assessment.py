@@ -1,30 +1,19 @@
-import atexit
-import os
-import tempfile
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 
-test_database = tempfile.TemporaryDirectory(prefix="cyber-sentinel-risk-tests-")
-original_database = os.environ.get("CYBER_SENTINEL_DB")
-os.environ["CYBER_SENTINEL_DB"] = str(Path(test_database.name) / "security.db")
-from backend import app as app_module
-if original_database is None:
-    os.environ.pop("CYBER_SENTINEL_DB", None)
-else:
-    os.environ["CYBER_SENTINEL_DB"] = original_database
-atexit.register(test_database.cleanup)
+from backend.tests.support import app
+from backend import security
+from backend.routes import detection as detection_routes
 
 
 class RiskAssessmentApiTests(unittest.TestCase):
     def setUp(self):
-        app_module.app.config.update(TESTING=True)
-        self.client = app_module.app.test_client()
+        self.client = app.test_client()
         with self.client.session_transaction() as session:
             session["user_id"] = 7
             session["csrf_token"] = "test-csrf-token"
         self.auth_patch = patch.object(
-            app_module, "get_user_by_id", return_value={"id": 7, "is_active": 1}
+            security, "get_user_by_id", return_value={"id": 7, "is_active": 1}
         )
         self.auth_patch.start()
         self.addCleanup(self.auth_patch.stop)
@@ -38,7 +27,7 @@ class RiskAssessmentApiTests(unittest.TestCase):
 
     def test_detected_event_returns_findings_and_saves_alert(self):
         with patch.object(
-            app_module, "record_event",
+            detection_routes, "record_event",
             return_value={"event_id": 41, "alert_id": 19, "duplicate": False},
         ) as record_event:
             response = self.post_assessment({
@@ -61,7 +50,7 @@ class RiskAssessmentApiTests(unittest.TestCase):
 
     def test_clean_event_is_saved_without_creating_alert(self):
         with patch.object(
-            app_module, "record_event",
+            detection_routes, "record_event",
             return_value={"event_id": 42, "alert_id": None, "duplicate": False},
         ) as record_event:
             response = self.post_assessment({

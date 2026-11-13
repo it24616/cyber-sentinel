@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../assets/js/core/frame.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Detection | Cyber Sentinel</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/pages/live-detection.css">
+</head>
+<body>
+<main class="page">
+
+    <header class="page-header">
+        <div>
+            <h1>Live detection</h1>
+            <p>Every manual and ingested event as it arrives, with the indicators and sources behind them.</p>
+        </div>
+        <div class="page-actions">
+            <span class="live-status" id="liveStatus" data-state="connecting" role="status">Connecting…</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="pauseBtn" aria-pressed="false">Pause</button>
+        </div>
+    </header>
+
+    <section class="grid grid-4" aria-label="Detection figures, last 24 hours">
+        <div class="card stat">
+            <span class="stat-label">Events analyzed <span class="badge">24h</span></span>
+            <span class="stat-value" id="kpiEvents">—</span>
+            <span class="stat-meta">Manual and ingested</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">Detections <span class="badge">24h</span></span>
+            <span class="stat-value" id="kpiDetections">—</span>
+            <span class="stat-meta" id="kpiRate">Detection rate —</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">Critical / High <span class="badge">24h</span></span>
+            <span class="stat-value text-critical" id="kpiSevere">—</span>
+            <span class="stat-meta" id="kpiMaxScore">Peak score —</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">Detection engine</span>
+            <span class="stat-value" id="kpiEngine">—</span>
+            <span class="stat-meta" id="kpiRules">Loading rules…</span>
+        </div>
+    </section>
+
+    <div class="grid live-grid section">
+        <section class="card" aria-labelledby="feedTitle">
+            <div class="card-header">
+                <div>
+                    <h2 id="feedTitle">Event feed</h2>
+                    <p>Newest first · click an event for details</p>
+                </div>
+                <div class="chip-group" id="levelFilters" role="group" aria-label="Filter by severity">
+                    <button type="button" class="chip" data-level="" aria-pressed="true">All</button>
+                    <button type="button" class="chip" data-level="CRITICAL" aria-pressed="false">Critical</button>
+                    <button type="button" class="chip" data-level="HIGH" aria-pressed="false">High</button>
+                    <button type="button" class="chip" data-level="MEDIUM" aria-pressed="false">Medium</button>
+                    <button type="button" class="chip" data-level="LOW" aria-pressed="false">Clean</button>
+                </div>
+            </div>
+            <ul class="feed" id="feed">
+                <li class="empty-inline">Loading events…</li>
+            </ul>
+        </section>
+
+        <div class="stack side-column">
+            <section class="card">
+                <div class="card-header"><h2>Top indicators <small>24h</small></h2></div>
+                <ul class="bar-list" id="topRules"><li class="empty-inline">Loading…</li></ul>
+            </section>
+            <section class="card">
+                <div class="card-header"><h2>Top sources <small>24h</small></h2></div>
+                <ul class="bar-list" id="topSources"><li class="empty-inline">Loading…</li></ul>
+            </section>
+        </div>
+    </div>
+
+    <section class="grid live-charts section">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Detections per hour <small>last 24 hours (UTC)</small></h2>
+                    <p>Events with at least one indicator</p>
+                </div>
+            </div>
+            <div class="chart-box"><canvas id="trendChart" role="img" aria-label="Detections per hour"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Events by severity</h2>
+                    <p>All recorded events</p>
+                </div>
+            </div>
+            <div class="chart-box"><canvas id="severityChart" role="img" aria-label="Events by severity"></canvas></div>
+            <ul class="legend" id="severityLegend"></ul>
+        </div>
+    </section>
+
+    <p class="subtle disclaimer">Detection is rule-based triage. A match is an indicator for investigation, not proof of an attack.</p>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="../assets/js/core/api.js"></script>
+<script src="../assets/js/core/ui.js"></script>
+<script src="../assets/js/core/charts.js"></script>
+<script src="../assets/js/pages/live-detection.js"></script>
+</body>
+</html>

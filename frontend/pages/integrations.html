@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../assets/js/core/frame.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrations | Cyber Sentinel</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/pages/integrations.css">
+</head>
+<body>
+<main class="page integrations-page">
+
+    <header class="page-header">
+        <div>
+            <h1>Connect an event source</h1>
+            <p>Create an API key for a server, application or log forwarder. Keys belong to your account and can be revoked at any time.</p>
+        </div>
+    </header>
+
+    <section class="card" aria-labelledby="createTitle">
+        <div class="card-header">
+            <div>
+                <h2 id="createTitle">1. Create an integration key</h2>
+                <p>Name it after the system that will send events.</p>
+            </div>
+        </div>
+        <form id="keyForm" class="key-form">
+            <div class="field">
+                <label for="keyName">Integration name</label>
+                <input id="keyName" class="input" maxlength="80" placeholder="e.g. web-server-prod" required autocomplete="off">
+            </div>
+            <button type="submit" class="btn btn-primary">Create key</button>
+        </form>
+        <p id="formMessage" class="form-message" role="status"></p>
+
+        <div id="newKeyNotice" class="callout callout-success new-key" hidden>
+            <div class="stack">
+                <strong>Copy this key now. It will not be shown again.</strong>
+                <div class="key-row">
+                    <code id="newKeyValue"></code>
+                    <button id="copyKey" type="button" class="btn btn-secondary btn-sm">Copy</button>
+                </div>
+                <span>Store it in your secrets manager or environment variables. Never commit it to source control.</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="card section" aria-labelledby="sendTitle">
+        <div class="card-header">
+            <div>
+                <h2 id="sendTitle">2. Send events</h2>
+                <p>POST up to 100 events per request. A stable <code>external_id</code> prevents duplicates when a request is retried.</p>
+            </div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Code example language">
+            <button type="button" role="tab" class="tab" id="tab-curl" aria-controls="snippet" aria-selected="true" data-lang="curl">curl</button>
+            <button type="button" role="tab" class="tab" id="tab-python" aria-controls="snippet" aria-selected="false" data-lang="python">Python</button>
+            <button type="button" role="tab" class="tab" id="tab-node" aria-controls="snippet" aria-selected="false" data-lang="node">JavaScript</button>
+        </div>
+        <div class="snippet-wrap" id="snippet" role="tabpanel" aria-labelledby="tab-curl">
+            <pre class="code-block"><code id="snippetCode"></code></pre>
+            <button type="button" class="btn btn-secondary btn-sm copy-snippet" id="copySnippet">Copy</button>
+        </div>
+        <p class="subtle hint">Each event is assessed by the rule engine. Events that match a rule also create an alert. Send production data only to a deployment behind HTTPS.</p>
+    </section>
+
+    <section class="card section" aria-labelledby="keysTitle">
+        <div class="card-header">
+            <div>
+                <h2 id="keysTitle">Your integration keys</h2>
+                <p>Only the key prefix is stored for display.</p>
+            </div>
+            <button id="refreshKeys" class="btn btn-ghost btn-sm" type="button">↻ Refresh</button>
+        </div>
+        <div id="keyList" class="key-list"><p class="empty-inline">Loading integration keys…</p></div>
+    </section>
+
+</main>
+
+<script src="../assets/js/core/api.js"></script>
+<script src="../assets/js/core/ui.js"></script>
+<script src="../assets/js/pages/integrations.js"></script>
+</body>
+</html>

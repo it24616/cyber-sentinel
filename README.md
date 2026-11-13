@@ -4,15 +4,13 @@ Cyber Sentinel is a local cybersecurity event triage prototype. It includes a st
 
 ## Features
 
-- Explainable indicators for SQL injection, XSS, brute-force activity, path traversal, command injection, and sensitive-file probes.
-- Risk score, severity, matched rule IDs, and human-readable recommendations.
-- SQLite alert history with status/read management, filtering, and pagination.
-- Summary counts and 24-hour alert trend data for the monitoring screen.
-- Request size limits, input validation, security headers, configurable CORS, and API rate limits.
-- Argon2id password hashes, short-lived signed sessions, CSRF checks, and per-account alert isolation.
-- One-time ownership migration for pre-account alerts: the first account claims existing unassigned active alerts, with a recorded import entry.
-- Per-account API keys for batch event ingestion, hashed at rest, one-time display, revocation, and external-ID deduplication.
-- Alert triage states (`Open`, `Acknowledged`, `In Progress`, `Resolved`, `False Positive`), required resolution notes, filters, pagination, and an activity history.
+- **Ten explainable detection rules**: SQL injection, XSS, command injection, JNDI/Log4Shell, XXE, path traversal, sensitive-file probes, SSRF, brute force and scanner activity. Each is mapped to MITRE ATT&CK and CWE and comes with remediation advice. Input is also checked after URL and HTML decoding.
+- **Analyze Event**: risk score (0–100), severity, matched text highlighted in context, and what to do next.
+- **Live Detection**: polling event feed, top indicators and sources, hourly detections and severity mix.
+- **Security Alerts**: triage states (`Open`, `Acknowledged`, `In Progress`, `Resolved`, `False Positive`), required resolution notes, filters, pagination, read state and a per-alert history.
+- **Dashboard**: system risk level (highest open severity), 7-day trend, recent alerts, account activity feed, and onboarding for new accounts.
+- **Integrations**: per-account API keys (hashed at rest, shown once, revocable) for batch ingestion with `external_id` deduplication, plus copy-ready curl, Python and JavaScript examples.
+- **Security**: Argon2id passwords, signed 8-hour sessions, CSRF checks, per-account data isolation, request size limits, input validation, security headers, configurable CORS and rate limits.
 
 Detection is rule-based triage. It is not machine learning, a network sensor, a WAF, or a production SIEM. A match is an indicator for investigation, not proof of an attack. The API requires a signed-in account for assessment and alert access. The Compose stack targets a single host with SQLite; put it behind TLS and a trusted reverse proxy before public use, and configure managed secrets and tested backups.
 
@@ -28,9 +26,48 @@ cp .env.example .env
 python backend/app.py
 ```
 
-Serve the project root using a local static server, for example `python3 -m http.server 5500`, then open `http://127.0.0.1:5500`. The API health endpoint is `http://127.0.0.1:5000/api/health`. SQLite defaults to `backend/security.db`; set `CYBER_SENTINEL_DB` to move it.
+In a second terminal, serve the frontend on port 5500 (the API expects this origin in development):
+
+```sh
+python3 -m http.server 5500 --directory frontend
+```
+
+Open `http://127.0.0.1:5500`, create an account, and sign in. The API health endpoint is `http://127.0.0.1:5050/api/health`. Local development uses port 5050 because macOS AirPlay Receiver occupies port 5000; if you change `PORT`, run `localStorage.cyberSentinelApiPort = "<port>"` in the browser console (the container stack is unaffected). SQLite defaults to `backend/security.db`; set `CYBER_SENTINEL_DB` to move it.
 
 Set `CORS_ORIGINS` in `.env` to the exact origins used by the frontend. Use a long random `SECRET_KEY` in production and set `APP_ENV=production`; production mode requires an explicit secret and rejects wildcard CORS. Set `ALLOW_SIGNUP=0` after creating accounts to close public registration. `Procfile` provides a Gunicorn process entry point for hosts that provide `PORT`. For multiple API workers, configure `RATELIMIT_STORAGE_URI` to a shared store such as Redis; the default in-memory limiter is intended for a single local process.
+
+Run the tests from the project root:
+
+```sh
+python -m unittest discover -s backend/tests -t .
+```
+
+## Project structure
+
+```
+backend/                Flask API (Python package)
+  app.py                Entry point: `python backend/app.py` or `gunicorn backend.app:app`
+  factory.py            create_app(): config, CORS, rate limiter, blueprints
+  config.py             Environment settings and production checks
+  security.py           Session auth, CSRF, API-key principal, headers, JSON errors
+  validation.py         Request parsing (pagination, event normalization)
+  constants.py          Risk levels, alert statuses and allowed transitions
+  extensions.py         Rate limiter and Argon2 password hasher
+  detection.py          Rule engine (RULES, assess_risk, rule_catalog)
+  database.py           SQLite schema and every query (always scoped by owner_id)
+  routes/               One blueprint per area: auth, health, detection, events, integrations, alerts
+  tests/                unittest suite; support.py points tests at a temporary database
+frontend/               Static site (served by Nginx in containers)
+  index.html            Landing page
+  login.html, register.html
+  app.html              App shell: sidebar, top bar (notifications, account) and the page frame
+  pages/                Pages shown inside the shell: dashboard, live-detection, alerts, analyze, integrations
+  assets/css/           base.css (design tokens), components.css (shared UI), shell.css, auth.css, pages/*.css
+  assets/js/core/       api.js (API client, CSRF), ui.js (modals, toasts, helpers), frame.js, charts.js
+  assets/js/            shell.js (router, notifications), pages/*.js, auth/*.js
+```
+
+Inside the app, routes live in the URL hash (`app.html#/alerts?status=Open`), so refresh and browser back/forward work. Pages opened directly (for example `pages/alerts.html`) redirect into the shell.
 
 ## Container deployment
 
@@ -67,7 +104,8 @@ docker compose --env-file .env.compose exec -T api rm -f "/tmp/$backup_name"
 - `GET /api/events?page=1&per_page=50` – authenticated recent event history.
 - `GET/POST /api/integrations/keys` and `DELETE /api/integrations/keys/<id>` – manage ingestion keys; the raw key is returned only once at creation.
 - `GET /api/alerts?page=1&per_page=50&status=Open&risk_level=HIGH&is_read=false` – filtered, paginated alerts.
-- `GET /api/stats` – totals, severity counts, today count, and 24 hourly buckets.
+- `GET /api/stats` – totals, severity counts, today count, 24 hourly buckets, 7 daily buckets, open alerts by severity, `posture` (highest severity among open alerts, or `CLEAR`), and `last_event_at`.
+- `GET /api/activity?limit=10` – newest alert activity across the account (created, status changes, read, archived) for the dashboard feed.
 - `PATCH /api/alerts/<id>` – update alert status and/or boolean `is_read`.
 - Alert statuses are `Open`, `Acknowledged`, `In Progress`, `Resolved`, and `False Positive`; terminal outcomes require a resolution note. `GET /api/alerts/<id>/activity` returns the account-scoped audit trail.
 - `DELETE /api/alerts/<id>` – archive an alert from the active queue while preserving its audit history.

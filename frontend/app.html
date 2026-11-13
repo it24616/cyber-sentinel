@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+    <title>Dashboard | Cyber Sentinel</title>
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/shell.css">
+</head>
+<body class="shell">
+
+    <aside class="sidebar" aria-label="Sidebar">
+        <a class="brand" href="index.html" title="Cyber Sentinel home">
+            <span class="brand-mark" aria-hidden="true">🛡</span>
+            <span class="brand-name">Cyber <span>Sentinel</span></span>
+        </a>
+
+        <nav class="nav" aria-label="Main menu">
+            <p class="nav-section">Monitor</p>
+            <a href="#/dashboard" data-route="dashboard"><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">Dashboard</span></a>
+            <a href="#/live-detection" data-route="live-detection"><span class="nav-icon" aria-hidden="true">◉</span><span class="nav-label">Live Detection</span></a>
+            <a href="#/alerts" data-route="alerts"><span class="nav-icon" aria-hidden="true">⚑</span><span class="nav-label">Security Alerts</span></a>
+            <a href="#/activities" data-route="activities"><span class="nav-icon" aria-hidden="true">◷</span><span class="nav-label">Recent Activities</span></a>
+
+            <p class="nav-section">Investigate</p>
+            <a href="#/analyze" data-route="analyze"><span class="nav-icon" aria-hidden="true">⌕</span><span class="nav-label">Analyze Event</span></a>
+
+            <p class="nav-section">Configure</p>
+            <a href="#/integrations" data-route="integrations"><span class="nav-icon" aria-hidden="true">⇄</span><span class="nav-label">Integrations</span></a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="index.html"><span class="nav-icon" aria-hidden="true">←</span><span class="nav-label">Back to website</span></a>
+        </div>
+    </aside>
+
+    <div class="shell-main">
+        <header class="topbar">
+            <h1 id="pageTitle">Dashboard</h1>
+
+            <div class="topbar-actions">
+                <div class="popover-wrap">
+                    <button type="button" class="icon-button" id="notificationBtn"
+                        aria-label="Unread alerts" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel">
+                        <span aria-hidden="true">🔔</span>
+                        <span class="count-badge" id="notificationCount" hidden>0</span>
+                    </button>
+                    <div class="popover notification-panel" id="notificationPanel" hidden>
+                        <div class="popover-header">
+                            <strong>Unread alerts</strong>
+                            <button type="button" class="link-btn" id="markAllReadBtn">Mark all read</button>
+                        </div>
+                        <ul class="notification-list" id="notificationList">
+                            <li class="empty-inline">Loading…</li>
+                        </ul>
+                        <a class="popover-footer" href="#/alerts?is_read=false">View all unread alerts →</a>
+                    </div>
+                </div>
+
+                <div class="popover-wrap">
+                    <button type="button" class="profile-button" id="profileBtn"
+                        aria-haspopup="true" aria-expanded="false" aria-controls="profileMenu">
+                        <span class="avatar" id="profileAvatar" aria-hidden="true">·</span>
+                        <span class="profile-text">
+                            <strong id="profileName">Loading…</strong>
+                            <small id="profileRole"></small>
+                        </span>
+                    </button>
+                    <div class="popover profile-menu" id="profileMenu" hidden>
+                        <div class="profile-summary">
+                            <strong id="profileMenuName"></strong>
+                            <span id="profileEmail" class="muted"></span>
+                        </div>
+                        <button type="button" class="menu-item" id="logoutBtn">Sign out</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="frame-progress" id="frameProgress" hidden></div>
+        <iframe id="pageFrame" class="page-frame" title="Dashboard"></iframe>
+    </div>
+
+    <script src="assets/js/core/api.js"></script>
+    <script src="assets/js/core/ui.js"></script>
+    <script src="assets/js/shell.js"></script>
+</body>
+</html>

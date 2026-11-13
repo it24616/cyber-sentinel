@@ -214,7 +214,8 @@ def revoke_api_key(owner_id, key_id):
         return cursor.rowcount > 0
 
 
-def record_event(owner_id, source, event_type, external_id, event_data, observed_at, result):
+def record_event(owner_id, source, event_type, external_id, event_data, observed_at, result, alert_min_score=1):
+    """Store an assessed event; open an alert when its risk score reaches alert_min_score."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     try:
         with get_connection() as connection:
@@ -228,7 +229,7 @@ def record_event(owner_id, source, event_type, external_id, event_data, observed
             ))
             event_id = cursor.lastrowid
             alert_id = None
-            if result["risk_score"] > 0:
+            if result["risk_score"] >= alert_min_score:
                 alert = connection.execute("""INSERT INTO security_alerts
                     (event_data, risk_score, risk_level, detected_threats, recommendation,
                      matched_rules, created_at, owner_id, source, event_id, updated_at)
@@ -333,7 +334,26 @@ def get_alert_stats(owner_id):
         trend = [{"hour": (start + timedelta(hours=offset)).strftime("%Y-%m-%dT%H"),
                   "count": hourly.get((start + timedelta(hours=offset)).strftime("%Y-%m-%dT%H"), 0)}
                  for offset in range(24)]
+        # Last 7 UTC days of events with at least one indicator, for the dashboard chart.
+        first_day = datetime.now(timezone.utc).date() - timedelta(days=6)
+        daily_counts = {row["day"]: row["count"] for row in connection.execute(
+            "SELECT substr(received_at, 1, 10) AS day, COUNT(*) AS count "
+            "FROM security_events WHERE owner_id = ? AND risk_score > 0 AND received_at >= ? GROUP BY day",
+            (owner_id, first_day.isoformat()))}
+        daily = [{"day": (first_day + timedelta(days=offset)).isoformat(),
+                  "count": daily_counts.get((first_day + timedelta(days=offset)).isoformat(), 0)}
+                 for offset in range(7)]
+        open_levels = {row["risk_level"]: row["count"] for row in connection.execute(
+            "SELECT risk_level, COUNT(*) AS count FROM security_alerts WHERE owner_id = ? AND is_deleted = 0 "
+            "AND status NOT IN ('Resolved', 'False Positive') GROUP BY risk_level", (owner_id,))}
+        last_event_at = connection.execute("SELECT MAX(received_at) FROM security_events WHERE owner_id = ?",
+                                           (owner_id,)).fetchone()[0]
+    open_by_level = {level: open_levels.get(level, 0) for level in ("CRITICAL", "HIGH", "MEDIUM", "LOW")}
+    # Posture = highest severity among alerts that still need attention.
+    posture = next((level for level in ("CRITICAL", "HIGH", "MEDIUM", "LOW") if open_by_level[level]), "CLEAR")
     return {"total": total, "open": open_count, "unread": unread,
+            "open_by_risk_level": open_by_level, "posture": posture,
+            "daily": daily, "last_event_at": last_event_at,
             "by_risk_level": {level: levels.get(level, 0) for level in ("CRITICAL", "HIGH", "MEDIUM", "LOW")},
             "event_by_risk_level": {level: event_levels.get(level, 0) for level in ("CRITICAL", "HIGH", "MEDIUM", "LOW")},
             "total_events": total_events, "today": recent, "today_events": today_events, "hourly": trend}
@@ -388,6 +408,23 @@ def get_alert_activity(owner_id, alert_id):
             WHERE a.owner_id = ? AND aa.alert_id = ? ORDER BY aa.id DESC""",
             (owner_id, alert_id)).fetchall()
         return [{**dict(row), "details": json.loads(row["details"] or "{}")} for row in rows]
+
+
+def get_recent_activity(owner_id, limit=10):
+    """Newest alert activity across the account, for the dashboard feed."""
+    with get_connection() as connection:
+        rows = connection.execute("""SELECT aa.id, aa.alert_id, aa.action, aa.details, aa.created_at,
+                   u.full_name AS actor, a.risk_level, a.detected_threats, a.source
+            FROM alert_activity aa JOIN security_alerts a ON a.id = aa.alert_id
+            LEFT JOIN users u ON u.id = aa.actor_id
+            WHERE a.owner_id = ? ORDER BY aa.id DESC LIMIT ?""", (owner_id, limit)).fetchall()
+    items = []
+    for row in rows:
+        item = dict(row)
+        item["details"] = json.loads(item["details"] or "{}")
+        item["detected_threats"] = json.loads(item["detected_threats"] or "[]")
+        items.append(item)
+    return items
 
 
 def get_detection_overview(owner_id, since_id=0, limit=25):
