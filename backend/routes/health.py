@@ -11,7 +11,6 @@ bp = Blueprint("health", __name__)
 SERVICE = "Cyber Sentinel API"
 
 
-@bp.get("/")
 @bp.get("/api/health")
 def readiness():
     ready = database_ready()

@@ -3,6 +3,7 @@
 from datetime import timedelta
 
 from flask import Flask
+from flask import send_from_directory
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -35,4 +36,17 @@ def create_app(settings=None):
     limiter.init_app(app)
     register_security(app)
     register_blueprints(app)
+
+    # Vercel deploys this Flask app as the API function. Serve the static UI
+    # from the same origin so browser auth requests reach the Flask routes too.
+    frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+
+    @app.get("/")
+    def frontend_home():
+        return send_from_directory(frontend_dir, "index.html")
+
+    @app.get("/<path:filename>")
+    def frontend_file(filename):
+        return send_from_directory(frontend_dir, filename)
+
     return app

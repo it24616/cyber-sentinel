@@ -16,7 +16,8 @@ def _flag(name, default):
 
 @dataclass(frozen=True)
 class Settings:
-    environment: str = field(default_factory=lambda: os.getenv("APP_ENV", "development").lower())
+    environment: str = field(default_factory=lambda: os.getenv(
+        "APP_ENV", "production" if os.getenv("VERCEL") == "1" else "development").lower())
     secret_key: str = field(default_factory=lambda: os.getenv("SECRET_KEY", ""))
     cors_origins: tuple = field(default_factory=lambda: tuple(
         origin.strip() for origin in os.getenv(

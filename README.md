@@ -82,6 +82,20 @@ docker compose --env-file .env.compose up --build -d
 
 Open `http://127.0.0.1:8080`, create the initial account, then set `ALLOW_SIGNUP=0` in `.env.compose` and run `docker compose --env-file .env.compose up -d api` to close public registration. For a TLS deployment, set `COOKIE_SECURE=1` and set `CORS_ORIGINS` to the exact HTTPS origin. Back up the SQLite volume using SQLite's online backup API; Redis contains only rate-limit counters and can be ephemeral. Run one API container per SQLite volume.
 
+## Vercel deployment
+
+Deploy the repository root (`.`), not only the `frontend` folder. The root `app.py` exposes the Flask app to Vercel, and Flask serves frontend files from `frontend/` so `/api/*` requests and session cookies use the same origin. In Vercel Project Settings, set **Root Directory** to the repository root.
+
+Set these Vercel environment variables before deploying:
+
+- `APP_ENV=production`
+- `SECRET_KEY` to a unique random value of at least 32 characters
+- `CORS_ORIGINS` to the exact `https://` origin of the deployed app
+- `ALLOW_SIGNUP=1` while creating accounts; set it to `0` afterward if registration should close
+- `COOKIE_SECURE=1`
+
+The Vercel fallback database uses `/tmp`, which is temporary and can disappear on a cold start. It is suitable only for a short demo; use a persistent database before relying on account or event data.
+
 Create a consistent SQLite backup without stopping the API:
 
 ```sh

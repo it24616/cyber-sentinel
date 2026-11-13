@@ -69,8 +69,19 @@
             options.body = JSON.stringify(body);
         }
         const response = await window.apiFetch(path, options);
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok || data.success === false) {
+        const contentType = response.headers.get("content-type") || "";
+        let data = {};
+        if (contentType.includes("application/json")) {
+            data = await response.json().catch(() => ({}));
+        } else {
+            const body = await response.text().catch(() => "");
+            if (!response.ok) {
+                data.error = `The API returned a non-JSON response (${response.status}). Check that the backend is deployed and /api requests are routed to it.`;
+            } else if (body) {
+                data.error = "The API returned an unexpected response. Check the Vercel backend routing.";
+            }
+        }
+        if (!response.ok || data.success === false || data.error) {
             const message = response.status === 429
                 ? "Too many requests in a short time. Wait a moment and try again."
                 : data.error || `Request failed (${response.status}).`;

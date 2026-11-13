@@ -8,7 +8,15 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-DATABASE = Path(os.getenv("CYBER_SENTINEL_DB", Path(__file__).with_name("security.db")))
+if os.getenv("CYBER_SENTINEL_DB"):
+    DATABASE = Path(os.environ["CYBER_SENTINEL_DB"])
+elif os.getenv("VERCEL") == "1":
+    # Vercel's function bundle is read-only; /tmp is writable but ephemeral.
+    # Configure a persistent database adapter before using this deployment for
+    # accounts or security data that must survive function cold starts.
+    DATABASE = Path("/tmp/cyber-sentinel/security.db")
+else:
+    DATABASE = Path(__file__).with_name("security.db")
 
 
 @contextmanager
