@@ -3,7 +3,7 @@
 import unittest
 import uuid
 
-from backend.tests.support import CSRF, app, client_for, disable_rate_limits, new_user
+from backend.tests.support import CSRF, app, client_for, disable_rate_limits, limiter, new_user
 
 SQLI = "GET /products?id=1' UNION SELECT password FROM users-- HTTP/1.1"
 WRITE = {"X-CSRF-Token": CSRF}
@@ -51,6 +51,14 @@ class AuthTests(unittest.TestCase):
         for path in ("/api/stats", "/api/alerts", "/api/events", "/api/activity", "/api/integrations/keys"):
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 401)
+
+    def test_frontend_files_are_not_rate_limited(self):
+        limiter.enabled = True
+        for _ in range(130):  # above the 120/hour default API limit
+            response = self.client.get("/login.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["X-Frame-Options"], "SAMEORIGIN")
+        self.assertEqual(self.client.get("/api/health").headers["X-Frame-Options"], "DENY")
 
     def test_unknown_api_route_returns_json_404(self):
         response = self.client.get("/api/does-not-exist")

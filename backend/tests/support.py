@@ -13,6 +13,11 @@ from pathlib import Path
 _database_dir = tempfile.TemporaryDirectory(prefix="cyber-sentinel-tests-")
 atexit.register(_database_dir.cleanup)
 os.environ["CYBER_SENTINEL_DB"] = str(Path(_database_dir.name) / "security.db")
+# Run the same suite against PostgreSQL with TEST_DATABASE_URL=postgresql://… (use an empty database).
+if os.getenv("TEST_DATABASE_URL"):
+    os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
+else:
+    os.environ.pop("DATABASE_URL", None)
 os.environ.setdefault("APP_ENV", "development")
 
 from backend import app as app_module  # noqa: E402

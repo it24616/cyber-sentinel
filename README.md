@@ -82,6 +82,16 @@ docker compose --env-file .env.compose up --build -d
 
 Open `http://127.0.0.1:8080`, create the initial account, then set `ALLOW_SIGNUP=0` in `.env.compose` and run `docker compose --env-file .env.compose up -d api` to close public registration. For a TLS deployment, set `COOKIE_SECURE=1` and set `CORS_ORIGINS` to the exact HTTPS origin. Back up the SQLite volume using SQLite's online backup API; Redis contains only rate-limit counters and can be ephemeral. Run one API container per SQLite volume.
 
+## Render deployment (free)
+
+`render.yaml` is a Render Blueprint for a free web service that serves both the API and the frontend. Data lives in PostgreSQL (for example free Neon) because the free instance's disk is reset on every deploy.
+
+1. Render dashboard → **New → Blueprint** → choose this repository.
+2. When asked, paste the Neon **pooled** connection string as `DATABASE_URL`. `SECRET_KEY` is generated automatically, and `CORS_ORIGINS` defaults to the service URL (`RENDER_EXTERNAL_URL`).
+3. Open `https://<service>.onrender.com`, register, then set `ALLOW_SIGNUP=0` in the service's Environment tab if registration should close.
+
+Free services sleep after a period without traffic; the first request afterwards takes up to about a minute. The health check uses `/api/health/live`, which does not touch the database, so Neon's free compute can scale to zero.
+
 ## Vercel deployment
 
 Deploy the repository root (`.`), not only the `frontend` folder. The root `app.py` exposes the Flask app to Vercel, and Flask serves frontend files from `frontend/` so `/api/*` requests and session cookies use the same origin. In Vercel Project Settings, set **Root Directory** to the repository root.
@@ -93,8 +103,16 @@ Set these Vercel environment variables before deploying:
 - `CORS_ORIGINS` to the exact `https://` origin of the deployed app
 - `ALLOW_SIGNUP=1` while creating accounts; set it to `0` afterward if registration should close
 - `COOKIE_SECURE=1`
+- `DATABASE_URL` to a PostgreSQL connection string (see below)
 
-The Vercel fallback database uses `/tmp`, which is temporary and can disappear on a cold start. It is suitable only for a short demo; use a persistent database before relying on account or event data.
+Vercel's disk is temporary and not shared between function instances, so accounts and alerts must live in an external PostgreSQL database. Without `DATABASE_URL` the app falls back to SQLite in `/tmp`, which loses data on cold starts and makes sign-in fail at random. Free options that need no card:
+
+- **Neon** (recommended): create a project at neon.tech, copy the connection string (it ends in `?sslmode=require`), and set it as `DATABASE_URL`. Idle databases wake automatically on the next request.
+- **Supabase**: use the **pooler** connection string from Project Settings → Database (the direct host is IPv6-only). Free projects are paused after a week without activity and must be restored from the dashboard.
+
+Tables are created automatically on the first request. To run the test suite against PostgreSQL, point `TEST_DATABASE_URL` at an empty database: `TEST_DATABASE_URL=postgresql://… python -m unittest discover -s backend/tests -t .`
+
+Vercel Hobby (free) only builds commits whose author is the Vercel account owner when the GitHub repository is private. If a deployment shows "Deployment Blocked", commit with the Git email of the GitHub account connected to Vercel (`git config user.email …`), or make the repository public.
 
 Create a consistent SQLite backup without stopping the API:
 

@@ -1,6 +1,7 @@
 """Application factory: builds a configured Flask app."""
 
 from datetime import timedelta
+from pathlib import Path
 
 from flask import Flask
 from flask import send_from_directory
@@ -41,11 +42,19 @@ def create_app(settings=None):
     # from the same origin so browser auth requests reach the Flask routes too.
     frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 
+    # Static files are exempt from the API rate limits: one page load fetches ~10 files.
     @app.get("/")
+    @limiter.exempt
     def frontend_home():
         return send_from_directory(frontend_dir, "index.html")
 
+    @app.get("/favicon.ico")
+    @limiter.exempt
+    def favicon():
+        return send_from_directory(frontend_dir / "assets" / "img", "favicon.svg", mimetype="image/svg+xml")
+
     @app.get("/<path:filename>")
+    @limiter.exempt
     def frontend_file(filename):
         return send_from_directory(frontend_dir, filename)
 

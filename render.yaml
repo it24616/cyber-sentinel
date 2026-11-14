@@ -1,0 +1,33 @@
+# Render Blueprint: Dashboard → New → Blueprint → pick this repo.
+# Free web service. Data lives in Neon Postgres (DATABASE_URL), because the
+# free instance's disk is wiped on every deploy and restart.
+services:
+  - type: web
+    name: cyber-sentinel
+    runtime: python
+    plan: free
+    branch: dev
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --config gunicorn.conf.py backend.app:app
+    # Liveness only: the readiness check queries the database and would keep
+    # Neon's free compute awake around the clock.
+    healthCheckPath: /api/health/live
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.2
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false # Render asks for it on the first deploy: paste the Neon pooled URL.
+      - key: ALLOW_SIGNUP
+        value: "1"
+      - key: COOKIE_SECURE
+        value: "1"
+      # One worker fits the 512 MB free instance and keeps in-memory rate limits consistent.
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: GUNICORN_THREADS
+        value: "4"

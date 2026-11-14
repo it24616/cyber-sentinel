@@ -52,7 +52,9 @@ def register_security(app):
     @app.after_request
     def security_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        # API responses must never be framed. Frontend pages (served by Flask on Vercel) are
+        # framed by the app shell (app.html), so allow same-origin framing for them.
+        response.headers["X-Frame-Options"] = "DENY" if request.path.startswith("/api/") else "SAMEORIGIN"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         if request.path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store"
