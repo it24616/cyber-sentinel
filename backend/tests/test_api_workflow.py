@@ -1,9 +1,14 @@
 """End-to-end API behaviour against a real (temporary) SQLite database."""
 
+import os
+import tempfile
 import unittest
 import uuid
+from pathlib import Path
+from unittest.mock import patch
 
 from backend.tests.support import CSRF, app, client_for, disable_rate_limits, limiter, new_user
+from backend import database
 
 SQLI = "GET /products?id=1' UNION SELECT password FROM users-- HTTP/1.1"
 WRITE = {"X-CSRF-Token": CSRF}
@@ -12,6 +17,19 @@ WRITE = {"X-CSRF-Token": CSRF}
 class AuthTests(unittest.TestCase):
     def setUp(self):
         disable_rate_limits(self)
+        self._database_dir = tempfile.TemporaryDirectory(prefix="cyber-sentinel-auth-tests-")
+        self.addCleanup(self._database_dir.cleanup)
+        database_patch = patch.multiple(
+            database,
+            IS_POSTGRES=False,
+            DATABASE=Path(self._database_dir.name) / "security.db",
+        )
+        database_patch.start()
+        self.addCleanup(database_patch.stop)
+        database.initialize_database()
+        signup_patch = patch.dict(os.environ, {"ALLOW_SIGNUP": "1"})
+        signup_patch.start()
+        self.addCleanup(signup_patch.stop)
         self.client = app.test_client()
         self.email = f"{uuid.uuid4().hex}@example.test"
 
@@ -46,6 +64,24 @@ class AuthTests(unittest.TestCase):
         self.assertEqual(self.register(password="short").status_code, 400)
         self.assertEqual(self.register(email="not-an-email").status_code, 400)
         self.assertEqual(self.register(full_name="").status_code, 400)
+
+    def test_registration_is_limited_to_ten_accounts(self):
+        self.assertEqual(self.register().status_code, 201)
+        for index in range(9):
+            self.assertIsNotNone(database.create_user(
+                f"Analyst {index}",
+                f"{uuid.uuid4().hex}@example.test",
+                "",
+                "test-password-hash",
+            ))
+
+        response = self.client.post("/api/auth/register", json={
+            "full_name": "Eleventh Analyst",
+            "email": f"{uuid.uuid4().hex}@example.test",
+            "password": "correct-horse-battery",
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("10 accounts", response.get_json()["error"])
 
     def test_protected_routes_require_login(self):
         for path in ("/api/stats", "/api/alerts", "/api/events", "/api/activity", "/api/integrations/keys"):

@@ -6,7 +6,7 @@ import secrets
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from flask import Blueprint, current_app, jsonify, request, session
 
-from backend.database import create_user, get_user_by_email, update_password_hash
+from backend.database import UserLimitReached, create_user, get_user_by_email, update_password_hash
 from backend.extensions import dummy_password_hash, limiter, password_hasher
 from backend.security import error, require_auth
 from backend.validation import json_object
@@ -14,6 +14,7 @@ from backend.validation import json_object
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 EMAIL_PATTERN = re.compile(r"[^\s@]+@[^\s@]+\.[^\s@]+")
+MAX_REGISTERED_ACCOUNTS = 10
 
 
 def _text(data, name):
@@ -39,7 +40,17 @@ def register():
         return error("Phone number is too long.", 400)
     if not isinstance(password, str) or not 12 <= len(password) <= 128:
         return error("Password must be 12 to 128 characters.", 400)
-    if not create_user(full_name, email, phone, password_hasher.hash(password)):
+    try:
+        user_id = create_user(
+            full_name,
+            email,
+            phone,
+            password_hasher.hash(password),
+            max_users=MAX_REGISTERED_ACCOUNTS,
+        )
+    except UserLimitReached:
+        return error(f"Registration is limited to {MAX_REGISTERED_ACCOUNTS} accounts.", 403)
+    if not user_id:
         return error("An account with that email already exists.", 409)
     return jsonify(success=True, message="Account created. Sign in to continue."), 201
 

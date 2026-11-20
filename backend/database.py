@@ -14,6 +14,12 @@ from pathlib import Path
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 IS_POSTGRES = DATABASE_URL.startswith(("postgres://", "postgresql://"))
+_USER_REGISTRATION_LOCK_ID = 4850182352543743302
+
+
+class UserLimitReached(Exception):
+    """Raised when account creation would exceed the configured registration cap."""
+
 
 if os.getenv("CYBER_SENTINEL_DB"):
     DATABASE = Path(os.environ["CYBER_SENTINEL_DB"])
@@ -293,9 +299,21 @@ def database_ready():
         return False
 
 
-def create_user(full_name, email, phone, password_hash):
+def create_user(full_name, email, phone, password_hash, max_users=None):
     try:
         with get_connection() as connection:
+            if max_users is not None:
+                if IS_POSTGRES:
+                    connection.execute("SELECT pg_advisory_xact_lock(?)", (_USER_REGISTRATION_LOCK_ID,))
+                else:
+                    connection.execute("BEGIN IMMEDIATE")
+                if connection.execute(
+                    "SELECT 1 FROM users WHERE lower(email) = lower(?)", (email.strip(),)
+                ).fetchone():
+                    return None
+                user_count = connection.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+                if user_count >= max_users:
+                    raise UserLimitReached
             user_id = _insert(connection, """INSERT INTO users (full_name, email, phone, password_hash, created_at)
                 VALUES (?, ?, ?, ?, ?)""", (
                 full_name, email.strip().lower(), phone, password_hash,

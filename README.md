@@ -80,7 +80,7 @@ python3 -c 'import secrets; print(secrets.token_hex(32))'
 docker compose --env-file .env.compose up --build -d
 ```
 
-Open `http://127.0.0.1:8080`, create the initial account, then set `ALLOW_SIGNUP=0` in `.env.compose` and run `docker compose --env-file .env.compose up -d api` to close public registration. For a TLS deployment, set `COOKIE_SECURE=1` and set `CORS_ORIGINS` to the exact HTTPS origin. Back up the SQLite volume using SQLite's online backup API; Redis contains only rate-limit counters and can be ephemeral. Run one API container per SQLite volume.
+Open `http://127.0.0.1:8080` and create an account. Registration automatically stops after 10 total accounts; set `ALLOW_SIGNUP=0` in `.env.compose` and restart the API to close it earlier. For a TLS deployment, set `COOKIE_SECURE=1` and set `CORS_ORIGINS` to the exact HTTPS origin. Back up the SQLite volume using SQLite's online backup API; Redis contains only rate-limit counters and can be ephemeral. Run one API container per SQLite volume.
 
 ## Render deployment (free)
 
@@ -88,7 +88,7 @@ Open `http://127.0.0.1:8080`, create the initial account, then set `ALLOW_SIGNUP
 
 1. Render dashboard → **New → Blueprint** → choose this repository.
 2. When asked, paste the Neon **pooled** connection string as `DATABASE_URL`. `SECRET_KEY` is generated automatically, and `CORS_ORIGINS` defaults to the service URL (`RENDER_EXTERNAL_URL`).
-3. Open `https://<service>.onrender.com`, register, then set `ALLOW_SIGNUP=0` in the service's Environment tab if registration should close.
+3. Open `https://<service>.onrender.com` and register. Registration automatically stops after 10 total accounts; set `ALLOW_SIGNUP=0` in the service's Environment tab to close it earlier.
 
 Free services sleep after a period without traffic; the first request afterwards takes up to about a minute. The health check uses `/api/health/live`, which does not touch the database, so Neon's free compute can scale to zero.
 
@@ -101,7 +101,7 @@ Set these Vercel environment variables before deploying:
 - `APP_ENV=production`
 - `SECRET_KEY` to a unique random value of at least 32 characters
 - `CORS_ORIGINS` to the exact `https://` origin of the deployed app
-- `ALLOW_SIGNUP=1` while creating accounts; set it to `0` afterward if registration should close
+- `ALLOW_SIGNUP=1` to allow signups; registration stops automatically after 10 total accounts. Set it to `0` to close registration earlier.
 - `COOKIE_SECURE=1`
 - `DATABASE_URL` to a PostgreSQL connection string (see below)
 
