@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+    <title>Create account | Cyber Sentinel</title>
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+<div class="auth">
+
+    <aside class="auth-aside">
+        <a class="auth-brand" href="index.html"><span aria-hidden="true">🛡</span><span>Cyber <span>Sentinel</span></span></a>
+        <div class="auth-pitch">
+            <h1>Set up security monitoring <em>in minutes.</em></h1>
+            <p>Create your account, try a sample attack, then connect your own servers and apps.</p>
+            <ul class="auth-points">
+                <li>Ten explainable detection rules mapped to MITRE ATT&amp;CK</li>
+                <li>Your data stays private to your account</li>
+                <li>Runs on a single small server</li>
+            </ul>
+        </div>
+        <p class="auth-copy">© 2026 Cyber Sentinel</p>
+    </aside>
+
+    <main class="auth-main">
+        <div class="auth-card">
+            <h2>Create your account</h2>
+            <p>It takes less than a minute.</p>
+
+            <form id="registerForm" class="auth-form" novalidate>
+                <div class="field">
+                    <label for="fullname">Full name</label>
+                    <input type="text" id="fullname" class="input" placeholder="Your name" autocomplete="name" maxlength="120" required>
+                </div>
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" class="input" placeholder="you@company.com" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <label for="phone">Phone number <span class="optional">(optional)</span></label>
+                    <input type="tel" id="phone" class="input" placeholder="+880 1XXX-XXXXXX" autocomplete="tel" maxlength="40">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="password" class="input" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required aria-describedby="passwordHint">
+                        <button type="button" class="btn btn-ghost btn-sm input-addon" data-toggle-password="password" aria-pressed="false">Show</button>
+                    </div>
+                    <span class="field-hint" id="passwordHint">Use 12 or more characters. A short sentence is easy to remember.</span>
+                </div>
+                <div class="field">
+                    <label for="confirmPassword">Confirm password</label>
+                    <input type="password" id="confirmPassword" class="input" placeholder="Repeat your password" autocomplete="new-password" required>
+                </div>
+                <label class="checkbox">
+                    <input type="checkbox" id="terms" required>
+                    <span>I agree to the Terms &amp; Conditions</span>
+                </label>
+
+                <button type="submit" class="btn btn-primary">Create account</button>
+                <p id="message" class="form-message" role="status" aria-live="polite"></p>
+            </form>
+
+            <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
+            <a class="auth-back" href="index.html">← Back to home</a>
+        </div>
+    </main>
+
+</div>
+
+<script src="assets/js/core/api.js"></script>
+<script src="assets/js/core/ui.js"></script>
+<script src="assets/js/auth/register.js"></script>
+</body>
+</html>

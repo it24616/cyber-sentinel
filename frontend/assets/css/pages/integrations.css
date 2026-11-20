@@ -1,0 +1,124 @@
+/* Integrations layout. */
+
+.integrations-page {
+    max-width: 1100px;
+}
+
+.key-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.key-form .field {
+    flex: 1;
+    min-width: 220px;
+}
+
+.new-key {
+    margin-top: 12px;
+}
+
+.key-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.key-row code {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    word-break: break-all;
+    flex: 1;
+    min-width: 0;
+}
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+}
+
+.tab {
+    padding: 8px 14px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: -1px;
+}
+
+.tab:hover {
+    color: var(--text);
+}
+
+.tab[aria-selected="true"] {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.snippet-wrap {
+    position: relative;
+}
+
+.copy-snippet {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.hint {
+    margin-top: 12px;
+    font-size: 12.5px;
+}
+
+.key-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.key-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+}
+
+.key-item.revoked {
+    opacity: 0.6;
+}
+
+.key-item p {
+    color: var(--text-subtle);
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+.key-item .row {
+    gap: 8px;
+}
+
+@media (max-width: 720px) {
+    .snippet-wrap {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .copy-snippet {
+        position: static;
+        align-self: flex-end;
+    }
+}

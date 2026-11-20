@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+    <title>Sign in | Cyber Sentinel</title>
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+<div class="auth">
+
+    <aside class="auth-aside">
+        <a class="auth-brand" href="index.html"><span aria-hidden="true">🛡</span><span>Cyber <span>Sentinel</span></span></a>
+        <div class="auth-pitch">
+            <h1>Know what's attacking your apps, <em>in plain language.</em></h1>
+            <p>Send your security events, get explainable alerts, and work them through to resolution.</p>
+            <ul class="auth-points">
+                <li>Every alert shows the matched text, why it matters and what to do</li>
+                <li>Alerts move from Open to Resolved with a full history</li>
+                <li>Connect any server or app with one API key</li>
+            </ul>
+        </div>
+        <p class="auth-copy">© 2026 Cyber Sentinel</p>
+    </aside>
+
+    <main class="auth-main">
+        <div class="auth-card">
+            <h2>Welcome back</h2>
+            <p>Sign in to your security dashboard.</p>
+
+            <form id="loginForm" class="auth-form" novalidate>
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" class="input" placeholder="you@company.com" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <div class="field-row">
+                        <label for="password">Password</label>
+                        <button type="button" class="link-btn" id="forgotPassword" aria-expanded="false" aria-controls="forgotPanel">Forgot password?</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" class="input" placeholder="Your password" autocomplete="current-password" required>
+                        <button type="button" class="btn btn-ghost btn-sm input-addon" data-toggle-password="password" aria-pressed="false">Show</button>
+                    </div>
+                </div>
+
+                <div class="callout callout-info forgot-panel" id="forgotPanel" hidden>
+                    <span><strong>Password reset by email isn't set up on this installation yet.</strong>
+                        Ask the person who runs Cyber Sentinel for your organisation to reset your password.</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Sign in</button>
+                <p id="message" class="form-message" role="status" aria-live="polite"></p>
+            </form>
+
+            <p class="auth-switch">New to Cyber Sentinel? <a href="register.html">Create an account</a></p>
+            <a class="auth-back" href="index.html">← Back to home</a>
+        </div>
+    </main>
+
+</div>
+
+<script src="assets/js/core/api.js"></script>
+<script src="assets/js/core/ui.js"></script>
+<script src="assets/js/auth/login.js"></script>
+</body>
+</html>

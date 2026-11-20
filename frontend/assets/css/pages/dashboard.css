@@ -1,0 +1,159 @@
+/* Dashboard layout. Components come from components.css. */
+
+.onboarding {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 20px;
+    border-color: rgba(0, 229, 160, 0.35);
+    background: linear-gradient(135deg, rgba(0, 229, 160, 0.08), transparent 60%), var(--surface);
+}
+
+.steps {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.steps li {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+}
+
+.steps p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 4px 0 12px;
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.dashboard-charts {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.dashboard-lists {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+.chart-box {
+    position: relative;
+    height: 240px;
+}
+
+.chart-box-sm {
+    height: 170px;
+    width: 170px;
+    flex-shrink: 0;
+}
+
+.distribution {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 240px;
+}
+
+.severity-legend {
+    list-style: none;
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.severity-legend li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+}
+
+.severity-legend strong {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+}
+
+.activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.activity-item:last-child {
+    border-bottom: 0;
+}
+
+.activity-item .dot {
+    margin-top: 6px;
+}
+
+.activity-item h3 {
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.activity-item p {
+    color: var(--text-muted);
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+.activity-item time {
+    margin-left: auto;
+    padding-left: 8px;
+    color: var(--text-subtle);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.threat-cell {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+    .dashboard-charts,
+    .dashboard-lists {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 720px) {
+    .steps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .distribution {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chart-box-sm {
+        margin: 0 auto;
+    }
+}

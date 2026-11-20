@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../assets/js/core/frame.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alerts | Cyber Sentinel</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/pages/alerts.css">
+</head>
+<body>
+<main class="page">
+
+    <header class="page-header">
+        <div>
+            <h1>Security alerts</h1>
+            <p>Triage what the rules found: acknowledge, investigate, then resolve or mark as a false positive.</p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="btn btn-secondary btn-sm" id="refreshBtn">↻ Refresh</button>
+        </div>
+    </header>
+
+    <section class="grid grid-4" aria-label="Alert summary">
+        <div class="card stat">
+            <span class="stat-label">Matching alerts</span>
+            <span class="stat-value" id="totalAlerts">—</span>
+            <span class="stat-meta">With the current filters</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">Open</span>
+            <span class="stat-value" id="openAlerts">—</span>
+            <span class="stat-meta">Not resolved yet</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">Unread</span>
+            <span class="stat-value" id="unreadAlerts">—</span>
+            <span class="stat-meta">Not looked at yet</span>
+        </div>
+        <div class="card stat">
+            <span class="stat-label">System risk level</span>
+            <span class="stat-value" id="postureValue">—</span>
+            <span class="stat-meta">Highest open severity</span>
+        </div>
+    </section>
+
+    <section class="card section">
+        <form class="filters" id="filters" aria-label="Filter alerts">
+            <div class="field">
+                <label for="statusFilter">Status</label>
+                <select id="statusFilter" class="select">
+                    <option value="">All statuses</option>
+                    <option>Open</option>
+                    <option>Acknowledged</option>
+                    <option>In Progress</option>
+                    <option>Resolved</option>
+                    <option>False Positive</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="levelFilter">Severity</label>
+                <select id="levelFilter" class="select">
+                    <option value="">All severities</option>
+                    <option value="CRITICAL">Critical</option>
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LOW">Low</option>
+                </select>
+            </div>
+            <div class="field">
+                <span class="label">Show</span>
+                <button type="button" class="chip unread-chip" id="unreadOnly" aria-pressed="false">Unread only</button>
+            </div>
+            <button type="button" class="link-btn clear-filters" id="clearFilters" hidden>Clear filters</button>
+        </form>
+
+        <div id="alertsContainer" class="alert-list" aria-live="polite">
+            <p class="empty-inline">Loading alerts…</p>
+        </div>
+
+        <nav class="pagination" aria-label="Pagination">
+            <button type="button" class="btn btn-secondary btn-sm" id="previousPage">← Previous</button>
+            <span id="pageLabel">Page 1</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="nextPage">Next →</button>
+        </nav>
+    </section>
+
+</main>
+
+<script src="../assets/js/core/api.js"></script>
+<script src="../assets/js/core/ui.js"></script>
+<script src="../assets/js/pages/alerts.js"></script>
+</body>
+</html>

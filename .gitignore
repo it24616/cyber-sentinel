@@ -1,0 +1,10 @@
+.venv/
+.env
+.env.compose
+__pycache__/
+*.py[cod]
+*.db-shm
+*.db-wal
+.neon
+node_modules/
+.env.vercel

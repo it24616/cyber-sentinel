@@ -1,0 +1,13 @@
+.git
+.venv
+.env
+.env*
+.claude
+setup-claude.sh
+# Never bake databases, caches or tests into images (patterns match at any depth).
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/__pycache__
+**/*.py[cod]
+backend/tests
