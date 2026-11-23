@@ -65,9 +65,19 @@ class AuthTests(unittest.TestCase):
         self.assertEqual(self.register(email="not-an-email").status_code, 400)
         self.assertEqual(self.register(full_name="").status_code, 400)
 
-    def test_registration_is_limited_to_ten_accounts(self):
+    def test_registration_allows_a_burst_but_remains_rate_limited(self):
+        limiter.enabled = True
+        for _ in range(10):
+            response = self.register(email=f"{uuid.uuid4().hex}@example.test")
+            self.assertEqual(response.status_code, 201)
+
+        response = self.register(email=f"{uuid.uuid4().hex}@example.test")
+        self.assertEqual(response.status_code, 429)
+        self.assertIn("Retry-After", response.headers)
+
+    def test_registration_is_limited_to_fifty_accounts(self):
         self.assertEqual(self.register().status_code, 201)
-        for index in range(9):
+        for index in range(49):
             self.assertIsNotNone(database.create_user(
                 f"Analyst {index}",
                 f"{uuid.uuid4().hex}@example.test",

@@ -23,7 +23,7 @@ def _text(data, name):
 
 
 @bp.post("/register")
-@limiter.limit("5 per hour")
+@limiter.limit("10 per minute")
 def register():
     if not current_app.config["SETTINGS"].allow_signup:
         return error("Account registration is disabled.", 403)

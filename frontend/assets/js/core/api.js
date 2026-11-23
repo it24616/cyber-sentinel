@@ -82,8 +82,11 @@
             }
         }
         if (!response.ok || data.success === false || data.error) {
+            const retryAfter = response.headers.get("Retry-After");
             const message = response.status === 429
-                ? "Too many requests in a short time. Wait a moment and try again."
+                ? retryAfter
+                    ? `Too many requests. Try again in ${retryAfter} seconds.`
+                    : "Too many requests. Wait a moment and try again."
                 : data.error || `Request failed (${response.status}).`;
             const error = new Error(message);
             error.status = response.status;

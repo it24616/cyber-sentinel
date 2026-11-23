@@ -29,6 +29,7 @@ def create_app(settings=None):
         SESSION_COOKIE_SAMESITE="Lax",
         PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
         RATELIMIT_STORAGE_URI=settings.ratelimit_storage_uri,
+        RATELIMIT_HEADERS_ENABLED=True,
     )
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     CORS(app, resources={r"/api/*": {"origins": list(settings.cors_origins), "supports_credentials": True}})
