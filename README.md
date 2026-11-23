@@ -142,3 +142,5 @@ docker compose --env-file .env.compose exec -T api rm -f "/tmp/$backup_name"
 - Alert statuses are `Open`, `Acknowledged`, `In Progress`, `Resolved`, and `False Positive`; terminal outcomes require a resolution note. `GET /api/alerts/<id>/activity` returns the account-scoped audit trail.
 - `DELETE /api/alerts/<id>` – archive an alert from the active queue while preserving its audit history.
 # Cyber_Sentinel
+#   c y b e r - s e n t i n e l  
+ 
