@@ -81,7 +81,7 @@ class AuthTests(unittest.TestCase):
             "password": "correct-horse-battery",
         })
         self.assertEqual(response.status_code, 403)
-        self.assertIn("10 accounts", response.get_json()["error"])
+        self.assertIn("50 accounts", response.get_json()["error"])
 
     def test_protected_routes_require_login(self):
         for path in ("/api/stats", "/api/alerts", "/api/events", "/api/activity", "/api/integrations/keys"):

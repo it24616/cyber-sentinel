@@ -14,7 +14,7 @@ from backend.validation import json_object
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 EMAIL_PATTERN = re.compile(r"[^\s@]+@[^\s@]+\.[^\s@]+")
-MAX_REGISTERED_ACCOUNTS = 10
+MAX_REGISTERED_ACCOUNTS = 50
 
 
 def _text(data, name):
