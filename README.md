@@ -2,17 +2,17 @@
 
 Explainable cybersecurity event triage, risk assessment, and alert management.
 
-## 2. Project Title
+## Project Title
 
 **Cyber Sentinel: Intelligent Cybersecurity Monitoring and Threat Detection System**
 
-## 4. Project Overview
+## Project Overview
 
 Cyber Sentinel is a web-based security event triage prototype. Users can submit event text or ingest events from an integration, review explainable rule matches, and manage resulting alerts from a dashboard.
 
 The project contains a static HTML/CSS/JavaScript frontend and a Python Flask API. Data is stored in SQLite for local development or PostgreSQL for hosted deployments. Detection is performed by a transparent rule engine; it is not machine learning and does not monitor a network by itself.
 
-## 5. Objectives
+## Objectives
 
 - Accept and assess security events from the dashboard or an API integration.
 - Make detection results understandable by showing matched indicators, evidence, and remediation guidance.
@@ -20,7 +20,7 @@ The project contains a static HTML/CSS/JavaScript frontend and a Python Flask AP
 - Offer a small, documented API that can be used by other services.
 - Support local development and deployment with managed PostgreSQL.
 
-## 6. Key Features
+## Key Features
 
 - **Explainable detection:** Ten rules cover SQL injection, cross-site scripting, command injection, JNDI/Log4Shell, XXE, path traversal, sensitive-file probes, SSRF indicators, brute-force indicators, and scanner signatures.
 - **Risk scoring:** Findings contribute weighted scores capped at 100 and are assigned `LOW`, `MEDIUM`, `HIGH`, or `CRITICAL` severity.
@@ -33,7 +33,7 @@ The project contains a static HTML/CSS/JavaScript frontend and a Python Flask AP
 - **Authentication and access control:** Argon2id password hashing, signed sessions, CSRF checks, and owner-scoped records.
 - **Deployment choices:** Run locally, with Docker Compose, on Render, or on Vercel.
 
-## 7. Technologies Used
+## Technologies Used
 
 | Area | Technologies |
 |---|---|
@@ -48,7 +48,7 @@ The project contains a static HTML/CSS/JavaScript frontend and a Python Flask AP
 
 The frontend is static and does not require an npm build step.
 
-## 8. System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -70,7 +70,7 @@ flowchart TD
 
 In the standard local setup, Flask serves both the frontend and API on one origin. Docker Compose serves the frontend with Nginx and forwards `/api/` requests to Flask. Vercel uses the repository-root `app.py` entry point to serve the frontend and API from the same origin.
 
-## 9. Project Folder Structure
+## Project Folder Structure
 
 ```text
 .
@@ -104,7 +104,7 @@ In the standard local setup, Flask serves both the frontend and API on one origi
 └── README.md
 ```
 
-## 10. Installation Guide
+## Installation Guide
 
 ### Prerequisites
 
@@ -168,7 +168,7 @@ In the standard local setup, Flask serves both the frontend and API on one origi
 
 4. Review `.env` before starting the application.
 
-## 11. Environment Setup
+## Environment Setup
 
 The application loads local settings from `.env`. Environment variables supplied by the hosting platform take precedence over values in the file.
 
@@ -197,7 +197,7 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 Do not paste production secrets into source files, screenshots, issue trackers, or chat.
 
-## 12. Database Configuration
+## Database Configuration
 
 ### SQLite (default for local development)
 
@@ -211,7 +211,7 @@ Vercel's filesystem is temporary, so Vercel deployments must use an external Pos
 
 The application does not currently have a versioned migration framework. Schema initialization creates missing tables and indexes; review schema changes and back up production data before deploying database changes. `TEST_DATABASE_URL` is intended only for testing against a separate, empty PostgreSQL database.
 
-## 13. How to Run
+## How to Run
 
 ### Run the Flask app locally
 
@@ -279,7 +279,7 @@ Then open `http://127.0.0.1:5500/`. The sample CORS configuration allows both lo
 
 If the health check returns an error, confirm the variables were added to the correct Vercel project and the **Production** environment, then redeploy.
 
-## 14. Screenshots
+## Screenshots
 
 Screenshots below were captured from the local application with blank forms and contain no user data.
 
@@ -295,7 +295,7 @@ Screenshots below were captured from the local application with blank forms and 
 
 ![Cyber Sentinel registration page](docs/screenshots/register.png)
 
-## 15. API Documentation
+## API Documentation
 
 The API returns JSON. Use the same origin as the frontend in production. For local work, the base URL is `http://127.0.0.1:5050`.
 
@@ -390,7 +390,7 @@ The endpoint returns HTTP `202` with accepted/duplicate counts and per-event ass
 
 Invalid input returns HTTP `400`. Other common statuses include `401` (missing authentication), `403` (CSRF/signup restriction), `404` (not found), `409` (conflict), `429` (rate limit), and `500` (server error). Error responses use `{"success": false, "error": "..."}`.
 
-## 16. Testing
+## Testing
 
 Run the backend test suite from the repository root:
 
@@ -400,7 +400,7 @@ python -m unittest discover -s backend/tests -t .
 
 Tests use a temporary SQLite database by default and cover registration/login, permissions, event ingestion, alert workflows, validation, and dashboard data. To run against PostgreSQL, set `TEST_DATABASE_URL` to a separate empty test database before running the suite. Never point tests at production data.
 
-## 17. Security Considerations
+## Security Considerations
 
 - Use unique production secrets and store them in the hosting provider's environment settings.
 - Use HTTPS in production and set `COOKIE_SECURE=1`.
@@ -413,7 +413,7 @@ Tests use a temporary SQLite database by default and cover registration/login, p
 - Set `RATELIMIT_STORAGE_URI` to a shared store such as Redis when running multiple workers.
 - Back up production data and test restores. The default local SQLite database is not a production backup strategy.
 
-## 18. Future Improvements
+## Future Improvements
 
 - Add versioned database migrations and automated backup/restore workflows.
 - Add MFA, password reset, and configurable account lifecycle management.
@@ -422,7 +422,7 @@ Tests use a temporary SQLite database by default and cover registration/login, p
 - Add production observability, load testing, and deployment smoke tests.
 - Evaluate an ML-assisted prioritization layer while keeping rule evidence explainable.
 
-## 19. Limitations
+## Limitations
 
 - Detection is a heuristic rule-based triage aid, not proof of compromise.
 - The application is not a packet sensor, endpoint agent, WAF, or full SIEM.
@@ -432,7 +432,7 @@ Tests use a temporary SQLite database by default and cover registration/login, p
 - In-memory rate-limit storage is not shared across multiple processes; configure Redis for multi-worker deployments.
 - SQLite is not appropriate for multi-instance hosted deployments.
 
-## 20. Contribution
+## Contribution
 
 1. Fork the repository and create a feature branch.
 2. Keep changes focused and add tests for behavior changes.
@@ -440,7 +440,7 @@ Tests use a temporary SQLite database by default and cover registration/login, p
 4. Do not commit `.env` files, API keys, database dumps, or user data.
 5. Open a pull request describing the change, validation performed, and any deployment/configuration impact.
 
-## 22. Author & Contact
+## Author & Contact
 
 **Project:** Cyber Sentinel
 
