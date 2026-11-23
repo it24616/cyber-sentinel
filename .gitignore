@@ -8,3 +8,8 @@ __pycache__/
 .neon
 node_modules/
 .env.vercel
+
+.vercel/
+.env.*
+!.env.example
+!.env.compose.example
