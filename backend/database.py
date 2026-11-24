@@ -197,6 +197,10 @@ _INDEXES = (
 
 
 def initialize_database():
+    if os.getenv("VERCEL") == "1" and not IS_POSTGRES:
+        raise RuntimeError(
+            "Vercel deployments require DATABASE_URL to point to an external PostgreSQL database."
+        )
     if IS_POSTGRES:
         with get_connection() as connection:
             for statement in (*_POSTGRES_SCHEMA, *_INDEXES):

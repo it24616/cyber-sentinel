@@ -14,16 +14,37 @@ def _flag(name, default):
     return os.getenv(name, default) == "1"
 
 
+def _cors_origins():
+    configured = os.getenv("CORS_ORIGINS")
+    if configured:
+        return tuple(origin.strip() for origin in configured.split(",") if origin.strip())
+
+    render_url = os.getenv("RENDER_EXTERNAL_URL")
+    if render_url:
+        return tuple(origin.strip() for origin in render_url.split(",") if origin.strip())
+
+    if os.getenv("VERCEL") == "1":
+        vercel_urls = (
+            os.getenv("VERCEL_PROJECT_PRODUCTION_URL"),
+            os.getenv("VERCEL_URL"),
+        )
+        origins = tuple(
+            f"https://{host.strip()}" for host in vercel_urls
+            if host and host.strip()
+        )
+        if origins:
+            return origins
+
+    return ("http://127.0.0.1:5500", "http://localhost:5500")
+
+
 @dataclass(frozen=True)
 class Settings:
     environment: str = field(default_factory=lambda: os.getenv(
         "APP_ENV", "production" if os.getenv("VERCEL") == "1" else "development").lower())
     secret_key: str = field(default_factory=lambda: os.getenv("SECRET_KEY", ""))
-    # CORS_ORIGINS wins; on Render, fall back to the service's own URL (RENDER_EXTERNAL_URL).
-    cors_origins: tuple = field(default_factory=lambda: tuple(
-        origin.strip() for origin in (
-            os.getenv("CORS_ORIGINS") or os.getenv("RENDER_EXTERNAL_URL")
-            or "http://127.0.0.1:5500,http://localhost:5500").split(",") if origin.strip()))
+    # CORS_ORIGINS wins; hosted platforms fall back to their own deployment origin.
+    cors_origins: tuple = field(default_factory=_cors_origins)
     ratelimit_storage_uri: str = field(default_factory=lambda: os.getenv("RATELIMIT_STORAGE_URI", "memory://"))
     host: str = field(default_factory=lambda: os.getenv("HOST", "127.0.0.1"))
     port: int = field(default_factory=lambda: int(os.getenv("PORT", "5050")))
